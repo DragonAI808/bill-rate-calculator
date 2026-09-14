@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bill Rate Calculator</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+</head>
+<body>
+<style>
+  :root{
+    color-scheme:light;
+
+    --navy:#1D4E89;
+    --navy-deep:#14365C;
+    --navy-tint:#E7EEF6;
+    --navy-pale:#A9C4DF;
+
+    --ink:#16212E;
+    --ink-mid:#3D4E60;
+    --ink-soft:#63748A;
+
+    --ground:#EBEEF3;
+    --panel:#FFFFFF;
+    --band:#F1F4F8;
+    --sunken:#F7F9FB;
+    --field:#FFFFFF;
+
+    --rule:#CBD5E0;
+    --rule-strong:#A9B7C6;
+    --rule-soft:#E1E7ED;
+
+    --green:#1F6B45;
+    --flag:#A03A1F;
+    --flag-tint:#FBEFEA;
+
+    --sans:"IBM Plex Sans","Segoe UI",Helvetica,Arial,sans-serif;
+    --mono:"IBM Plex Mono","SF Mono",Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  img{max-width:100%}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--ground);
+    color:var(--ink);
+    font:400 15px/1.5 var(--sans);
+    -webkit-font-smoothing:antialiased;
+    padding-block:26px 60px;
+    padding-inline:20px;
+  }
+  .wrap{max-width:1060px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+
+  /* ---------- masthead ---------- */
+  .masthead{
+    background:var(--navy-deep);
+    border-bottom:3px solid var(--navy);
+    padding:20px 22px;
+    display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:6px 16px;
+  }
+  .masthead h1{
+    margin:0;color:#fff;
+    font:600 clamp(24px,4vw,34px)/1.1 var(--sans);
+    letter-spacing:-.015em;
+  }
+  .masthead .stamp{
+    font:500 11px/1 var(--sans);text-transform:uppercase;letter-spacing:.14em;
+    color:var(--navy-pale);
+  }
+
+  /* ---------- cards ---------- */
+  .cols{display:grid;grid-template-columns:minmax(0,0.95fr) minmax(0,1.05fr);gap:18px;align-items:start}
+  @media (max-width:860px){.cols{grid-template-columns:1fr}}
+
+  .card{background:var(--panel);border:1px solid var(--rule);box-shadow:0 1px 0 rgba(22,33,46,.05)}
+  .card-hd{
+    background:var(--band);border-bottom:1px solid var(--rule);
+    padding:11px 16px;display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 14px;
+  }
+  .card-hd h2{
+    margin:0;font:600 12px/1.3 var(--sans);
+    text-transform:uppercase;letter-spacing:.1em;color:var(--ink);
+  }
+  .card-hd .hint{font-size:12.5px;color:var(--ink-soft)}
+
+  .card-sub{
+    background:var(--sunken);border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);
+    padding:8px 16px;font:500 11px/1.3 var(--sans);
+    text-transform:uppercase;letter-spacing:.1em;color:var(--ink-mid);
+  }
+
+  /* ---------- form rows ---------- */
+  .frow{
+    display:grid;grid-template-columns:148px minmax(0,1fr);gap:14px;align-items:center;
+    padding:10px 16px;border-bottom:1px solid var(--rule-soft);
+  }
+  .frow:last-child{border-bottom:0}
+  .frow > label{margin:0;font-size:13.5px;color:var(--ink-mid);line-height:1.3}
+  @media (max-width:520px){
+    .frow{grid-template-columns:1fr;gap:6px}
+  }
+
+  .inputgrp{display:flex;border:1px solid var(--rule);background:var(--field);border-radius:2px;overflow:hidden}
+  .inputgrp:focus-within{outline:2px solid var(--navy);outline-offset:-1px}
+  .inputgrp .u{
+    display:flex;align-items:center;padding:0 9px;background:var(--band);
+    border-right:1px solid var(--rule);font:400 12px/1 var(--sans);color:var(--ink-soft);
+  }
+  .inputgrp .u.suffix{border-right:0;border-left:1px solid var(--rule)}
+  .inputgrp input{border:0;background:transparent;width:100%;min-width:0}
+  .inputgrp input:focus{outline:none}
+
+  input[type=number],input[type=text],select{
+    padding:8px 10px;background:var(--field);color:var(--ink);
+    border:1px solid var(--rule);border-radius:2px;width:100%;
+    font:400 15px/1.3 var(--mono);font-variant-numeric:tabular-nums;
+  }
+  select{font-family:var(--sans);font-size:14px;padding-right:8px}
+  input:focus,select:focus,button:focus-visible{outline:2px solid var(--navy);outline-offset:1px}
+
+  .segs{display:flex;border:1px solid var(--rule);border-radius:2px;overflow:hidden}
+  .segs button{
+    flex:1;padding:8px 6px;background:var(--panel);border:0;
+    border-right:1px solid var(--rule);cursor:pointer;
+    font:400 12.5px/1.2 var(--sans);color:var(--ink-mid);
+  }
+  .segs button:last-child{border-right:0}
+  .segs button:hover{background:var(--band)}
+  .segs button[aria-pressed=true]{background:var(--navy);color:#fff;font-weight:500}
+
+  /* ---------- headline result ---------- */
+  .hero{background:var(--navy-deep);padding:16px 20px 18px}
+  .hero .lede{
+    margin:0 0 4px;font:500 11px/1 var(--sans);
+    text-transform:uppercase;letter-spacing:.14em;color:var(--navy-pale);
+  }
+  .hero .big{
+    font:500 clamp(38px,7vw,52px)/1 var(--mono);
+    color:#fff;font-variant-numeric:tabular-nums;letter-spacing:-.02em;
+  }
+  .hero .big small{font-size:.34em;color:var(--navy-pale);letter-spacing:0;font-weight:400}
+
+  /* ---------- metric cells ---------- */
+  .metrics{
+    display:grid;grid-template-columns:1fr 1fr;gap:1px;
+    background:var(--rule);border-bottom:1px solid var(--rule);margin:0;
+  }
+  .metric{background:var(--panel);padding:11px 14px 12px}
+  .metric dt{
+    font:500 10.5px/1.2 var(--sans);text-transform:uppercase;letter-spacing:.09em;color:var(--ink-soft);
+  }
+  .metric dd{
+    margin:4px 0 0;font:500 21px/1.15 var(--mono);
+    font-variant-numeric:tabular-nums;color:var(--ink);
+  }
+  .metric dd.gp{color:var(--green)}
+  .metric dd.warn{color:var(--flag)}
+
+  /* ---------- tables ---------- */
+  table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+  thead th{
+    background:var(--band);padding:8px 10px;text-align:right;
+    font:500 10.5px/1.25 var(--sans);text-transform:uppercase;letter-spacing:.07em;
+    color:var(--ink-soft);border-bottom:1px solid var(--rule-strong);
+    border-right:1px solid var(--rule-soft);
+  }
+  tbody td{
+    padding:7px 10px;text-align:right;font:400 14px/1.3 var(--mono);
+    border-bottom:1px solid var(--rule-soft);border-right:1px solid var(--rule-soft);
+  }
+  thead th:last-child,tbody td:last-child,tfoot td:last-child,tfoot th:last-child{border-right:0}
+  thead th:first-child,tbody td:first-child,tfoot th:first-child{text-align:left}
+  tbody td:first-child{font-family:var(--sans)}
+  tbody tr:nth-child(even) td{background:var(--sunken)}
+  td.out{background:var(--navy-tint);font-weight:500}
+  tbody tr:nth-child(even) td.out{background:#DFE9F4}
+  tfoot th,tfoot td{
+    background:var(--band);padding:10px;text-align:right;
+    border-top:2px solid var(--navy);border-right:1px solid var(--rule-soft);
+    font:500 14px/1.3 var(--mono);color:var(--ink);
+  }
+  tfoot th{
+    text-align:left;font:600 11px/1.3 var(--sans);
+    text-transform:uppercase;letter-spacing:.08em;color:var(--ink-mid);
+  }
+  tfoot tr:last-child th,tfoot tr:last-child td{border-top:1px solid var(--rule)}
+  td input{padding:6px 8px;font-size:14px}
+  td input[type=text]{font-family:var(--sans)}
+  .scroller{overflow-x:auto}
+  #orderTable{min-width:820px}
+  .empty td{padding:20px 16px;text-align:left;font-family:var(--sans);color:var(--ink-soft);font-size:14px;background:var(--panel)}
+
+  /* ---------- buttons / toolbar ---------- */
+  .btn{
+    padding:8px 14px;background:var(--panel);color:var(--ink);
+    border:1px solid var(--rule-strong);border-radius:2px;cursor:pointer;
+    font:500 13px/1.2 var(--sans);
+  }
+  .btn:hover{background:var(--band);border-color:var(--ink-mid)}
+  .btn-primary{background:var(--navy);border-color:var(--navy);color:#fff}
+  .btn-primary:hover{background:var(--navy-deep);border-color:var(--navy-deep)}
+  .btn-quiet{
+    border-color:var(--rule);color:var(--ink-soft);padding:4px 9px;font-size:12px;font-weight:400;
+  }
+  .btn-quiet:hover{background:var(--flag);border-color:var(--flag);color:#fff}
+  .toolbar{
+    display:flex;gap:10px;align-items:center;flex-wrap:wrap;
+    padding:12px 16px;background:var(--sunken);border-top:1px solid var(--rule);
+  }
+  .weeks{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ink-mid);margin-left:auto}
+  .weeks .inputgrp{width:96px}
+
+  /* ---------- alert ---------- */
+  .alert{
+    display:none;padding:11px 16px;background:var(--flag-tint);
+    border-top:1px solid var(--rule);border-left:4px solid var(--flag);
+    color:var(--flag);font-size:13px;line-height:1.45;
+  }
+</style>
+
+<div class="wrap">
+  <header class="masthead">
+    <h1>Bill Rate Calculator</h1>
+    <span class="stamp">Quote worksheet</span>
+  </header>
+
+  <div class="cols">
+    <section class="card">
+      <div class="card-hd"><h2>Rate card</h2><span class="hint">One requisition</span></div>
+
+      <div class="frow">
+        <label for="scope">Job scope</label>
+        <select id="scope">
+          <option value="light-industrial">Light industrial</option>
+          <option value="office">Office</option>
+          <option value="light-assembly">Light assembly</option>
+          <option value="custom">Custom burden</option>
+        </select>
+      </div>
+
+      <div class="frow">
+        <label for="pay">Pay rate</label>
+        <div class="inputgrp">
+          <span class="u">$</span>
+          <input id="pay" type="number" min="0" step="0.25" value="20.00">
+          <span class="u suffix">/hr</span>
+        </div>
+      </div>
+
+      <div class="frow">
+        <label for="burden">Burden</label>
+        <div class="inputgrp">
+          <input id="burden" type="number" min="0" step="0.001" value="24.716">
+          <span class="u suffix">%</span>
+        </div>
+      </div>
+
+      <div class="frow">
+        <label>Price from</label>
+        <div class="segs" id="modeSegs">
+          <button type="button" data-mode="markup" aria-pressed="true">Markup</button>
+          <button type="button" data-mode="margin" aria-pressed="false">Margin</button>
+          <button type="button" data-mode="bill" aria-pressed="false">Bill rate</button>
+        </div>
+      </div>
+
+      <div class="frow">
+        <label for="driver" id="driverLabel">Markup on pay</label>
+        <div class="inputgrp">
+          <span class="u" id="driverPrefix" hidden>$</span>
+          <input id="driver" type="number" min="0" step="1" value="55">
+          <span class="u suffix" id="driverSuffix">%</span>
+        </div>
+      </div>
+
+      <div class="frow">
+        <label for="otMode">Overtime billing</label>
+        <select id="otMode">
+          <option value="x15">Bill OT at 1.5x the bill rate</option>
+          <option value="cost">Pass OT premium through at cost</option>
+        </select>
+      </div>
+
+      <div class="frow">
+        <label for="stHrs">Straight hours / wk</label>
+        <div class="inputgrp"><input id="stHrs" type="number" min="0" step="1" value="40"><span class="u suffix">hrs</span></div>
+      </div>
+
+      <div class="frow">
+        <label for="otHrs">OT hours / wk</label>
+        <div class="inputgrp"><input id="otHrs" type="number" min="0" step="1" value="5"><span class="u suffix">hrs</span></div>
+      </div>
+
+      <div class="alert" id="alert"></div>
+    </section>
+
+    <section class="card" id="results">
+      <div class="card-hd"><h2>Result</h2></div>
+
+      <div class="hero">
+        <p class="lede">Straight-time bill rate</p>
+        <div class="big" id="billOut">$31.00<small>/hr</small></div>
+      </div>
+
+      <dl class="metrics">
+        <div class="metric"><dt>Gross profit</dt><dd class="gp" id="gpOut">$7.00/hr</dd></div>
+        <div class="metric"><dt>Gross margin</dt><dd id="marginOut">22.6%</dd></div>
+        <div class="metric"><dt>Markup on pay</dt><dd id="markupOut">55.0%</dd></div>
+        <div class="metric"><dt>Loaded pay cost</dt><dd id="costOut">$24.00/hr</dd></div>
+      </dl>
+
+      <div class="card-sub">Overtime, per hour</div>
+      <table>
+        <thead>
+          <tr><th>Basis</th><th>Pay</th><th>Cost</th><th>Bill</th><th>GP</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Time and a half</td>
+            <td id="otPay">$30.00</td>
+            <td id="otCost">$36.00</td>
+            <td class="out" id="otBill">$46.50</td>
+            <td class="out" id="otGp">$10.50</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="card-sub">This requisition, weekly</div>
+      <dl class="metrics">
+        <div class="metric"><dt>Billed to client</dt><dd id="wkBill">$1,472.50</dd></div>
+        <div class="metric"><dt>Gross profit</dt><dd class="gp" id="wkGp">$332.50</dd></div>
+      </dl>
+    </section>
+  </div>
+
+  <section class="card">
+    <div class="card-hd">
+      <h2>Order</h2>
+      <span class="hint">One line per requisition. Job scope and overtime rule above apply to every line.</span>
+    </div>
+    <div class="scroller">
+      <table id="orderTable">
+        <thead>
+          <tr>
+            <th>Role</th><th>Heads</th><th>Pay $/hr</th><th>Bill $/hr</th>
+            <th>ST hrs</th><th>OT hrs</th><th>Weekly bill</th><th>Weekly GP</th><th>Margin</th><th></th>
+          </tr>
+        </thead>
+        <tbody id="reqBody"></tbody>
+        <tfoot>
+          <tr>
+            <th>Order total</th>
+            <td id="tHeads">0</td>
+            <td colspan="4"></td>
+            <td id="tWeeklyBill">$0</td>
+            <td id="tWeeklyGp">$0</td>
+            <td id="tMargin">&mdash;</td>
+            <td></td>
+          </tr>
+          <tr>
+            <th>Annualized GP</th>
+            <td colspan="8" id="tAnnualGp">$0</td>
+            <td></td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+    <div class="toolbar">
+      <button class="btn btn-primary" id="addFromCard" type="button">Add line from rate card</button>
+      <button class="btn" id="addLine" type="button">Add blank line</button>
+      <span class="weeks">Weeks billed
+        <span class="inputgrp"><input id="weeks" type="number" min="1" max="52" step="1" value="48"></span>
+      </span>
+    </div>
+  </section>
+</div>
+
+<script>
+(function(){
+  var $ = function(id){ return document.getElementById(id); };
+  var money = function(n){
+    return (n < 0 ? "-$" : "$") + Math.abs(n).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});
+  };
+  var money0 = function(n){
+    return (n < 0 ? "-$" : "$") + Math.abs(n).toLocaleString("en-US",{minimumFractionDigits:0,maximumFractionDigits:0});
+  };
+  var pct = function(n){ return (n*100).toFixed(1) + "%"; };
+  var num = function(el, fallback){
+    var v = parseFloat(el.value);
+    return isFinite(v) ? v : (fallback || 0);
+  };
+
+  var mode = "markup";
+  var lines = [];
+  var nextId = 1;
+
+  /* ---------- core math ---------- */
+  /* Approved burden rates by job scope, as a percentage of wages.
+     Source decimals: .24716 / .19716 / .21061 */
+  var BURDEN_BY_SCOPE = {
+    "light-industrial": 24.716,
+    "office":           19.716,
+    "light-assembly":   21.061
+  };
+
+  function price(pay, burdenPct, mode, driver){
+    var b = burdenPct / 100;
+    var cost = pay * (1 + b);
+    var bill;
+    if (mode === "markup")      bill = pay * (1 + driver/100);
+    else if (mode === "margin") bill = (driver >= 100) ? Infinity : cost / (1 - driver/100);
+    else                        bill = driver;
+    var gp = bill - cost;
+    return {
+      cost: cost,
+      bill: bill,
+      gp: gp,
+      margin: bill > 0 ? gp / bill : 0,
+      markup: pay > 0 ? bill / pay - 1 : 0
+    };
+  }
+
+  function otFigures(pay, burdenPct, bill, otMode){
+    var b = burdenPct / 100;
+    var otPay  = pay * 1.5;
+    var otCost = otPay * (1 + b);
+    var otBill = (otMode === "x15") ? bill * 1.5 : bill + (0.5 * pay * (1 + b));
+    return { otPay:otPay, otCost:otCost, otBill:otBill, otGp:otBill - otCost };
+  }
+
+  /* ---------- rate card ---------- */
+  var driverDefaults = { markup:55, margin:25, bill:31 };
+  var driverLabels = { markup:"Markup on pay", margin:"Target gross margin", bill:"Bill rate from client" };
+
+  function setMode(m){
+    mode = m;
+    Array.prototype.forEach.call($("modeSegs").children, function(btn){
+      btn.setAttribute("aria-pressed", btn.dataset.mode === m ? "true" : "false");
+    });
+    $("driverLabel").textContent = driverLabels[m];
+    $("driver").step  = (m === "bill") ? "0.25" : "1";
+    $("driver").value = driverDefaults[m];
+    $("driverPrefix").hidden = (m !== "bill");
+    $("driverSuffix").textContent = (m === "bill") ? "/hr" : "%";
+    render();
+  }
+
+  function cardState(){
+    var pay = num($("pay")), burden = num($("burden"));
+    var r = price(pay, burden, mode, num($("driver")));
+    var ot = otFigures(pay, burden, r.bill, $("otMode").value);
+    return { pay:pay, burden:burden, r:r, ot:ot };
+  }
+
+  function renderCard(){
+    var s = cardState(), r = s.r, ot = s.ot;
+    var bad = !isFinite(r.bill) || r.bill <= 0;
+
+    $("billOut").innerHTML = (bad ? "&mdash;" : money(r.bill)) + "<small>/hr</small>";
+    $("gpOut").textContent     = bad ? "—" : money(r.gp) + "/hr";
+    $("marginOut").textContent = bad ? "—" : pct(r.margin);
+    $("markupOut").textContent = bad ? "—" : pct(r.markup);
+    $("costOut").textContent   = money(r.cost) + "/hr";
+
+    $("gpOut").className     = (!bad && r.gp < 0) ? "warn" : "gp";
+    $("marginOut").className = (!bad && r.margin < 0.10) ? "warn" : "";
+
+    $("otPay").textContent  = money(ot.otPay);
+    $("otCost").textContent = money(ot.otCost);
+    $("otBill").textContent = bad ? "—" : money(ot.otBill);
+    $("otGp").textContent   = bad ? "—" : money(ot.otGp);
+
+    var st = num($("stHrs")), otH = num($("otHrs"));
+    $("wkBill").textContent = bad ? "—" : money0(r.bill * st + ot.otBill * otH);
+    $("wkGp").textContent   = bad ? "—" : money0(r.gp * st + ot.otGp * otH);
+
+    var msg = "";
+    if (mode === "margin" && num($("driver")) >= 100) msg = "Margin must be under 100%. Bill rate is undefined at 100%.";
+    else if (r.gp < 0) msg = "This bill rate is below loaded cost. Every hour worked loses money.";
+    var a = $("alert");
+    a.textContent = msg;
+    a.style.display = msg ? "block" : "none";
+  }
+
+  /* ---------- order lines ---------- */
+  function blankLine(pref){
+    var s = cardState();
+    return {
+      id: nextId++,
+      role: "",
+      heads: 1,
+      pay: pref ? s.pay : 20,
+      bill: pref && isFinite(s.r.bill) ? Math.round(s.r.bill*100)/100 : 31,
+      st: pref ? num($("stHrs")) : 40,
+      ot: pref ? num($("otHrs")) : 0
+    };
+  }
+
+  function lineMath(L){
+    var burden = num($("burden"));
+    var cost = L.pay * (1 + burden/100);
+    var stGp = L.bill - cost;
+    var ot = otFigures(L.pay, burden, L.bill, $("otMode").value);
+    var weeklyBill = (L.bill * L.st + ot.otBill * L.ot) * L.heads;
+    var weeklyGp   = (stGp   * L.st + ot.otGp   * L.ot) * L.heads;
+    return { weeklyBill:weeklyBill, weeklyGp:weeklyGp, margin: weeklyBill > 0 ? weeklyGp/weeklyBill : 0 };
+  }
+
+  var FIELDS = [
+    { f:"role",  type:"text",   attrs:'placeholder="Forklift, 2nd shift"' },
+    { f:"heads", type:"number", attrs:'min="0" step="1" style="width:64px"' },
+    { f:"pay",   type:"number", attrs:'min="0" step="0.25" style="width:86px"' },
+    { f:"bill",  type:"number", attrs:'min="0" step="0.25" style="width:86px"' },
+    { f:"st",    type:"number", attrs:'min="0" step="1" style="width:64px"' },
+    { f:"ot",    type:"number", attrs:'min="0" step="1" style="width:64px"' }
+  ];
+
+  /* Rows are built once and then updated in place, so typing never steals focus. */
+  function buildRow(L){
+    var tr = document.createElement("tr");
+    var html = "";
+    FIELDS.forEach(function(spec){
+      html += '<td><input type="' + spec.type + '" id="line' + L.id + '-' + spec.f + '" data-f="' + spec.f + '" ' + spec.attrs + '></td>';
+    });
+    html += '<td class="out c-bill"></td><td class="out c-gp"></td><td class="out c-margin"></td>' +
+            '<td><button class="btn btn-quiet" type="button">Remove</button></td>';
+    tr.innerHTML = html;
+
+    Array.prototype.forEach.call(tr.querySelectorAll("input"), function(inp){
+      var f = inp.dataset.f;
+      inp.value = L[f];
+      inp.addEventListener("input", function(){
+        L[f] = (f === "role") ? inp.value : (parseFloat(inp.value) || 0);
+        recalc();
+      });
+    });
+    tr.querySelector("button").addEventListener("click", function(){
+      lines = lines.filter(function(x){ return x.id !== L.id; });
+      tr.remove();
+      showEmptyState();
+      recalc();
+    });
+
+    L.el = tr;
+    return tr;
+  }
+
+  function showEmptyState(){
+    var body = $("reqBody");
+    var existing = body.querySelector(".empty");
+    if (!lines.length && !existing){
+      var tr = document.createElement("tr");
+      tr.className = "empty";
+      tr.innerHTML = '<td colspan="10">No lines yet. Add one to price a multi-req order.</td>';
+      body.appendChild(tr);
+    } else if (lines.length && existing){
+      existing.remove();
+    }
+  }
+
+  function addLine(pref){
+    var L = blankLine(pref);
+    lines.push(L);
+    showEmptyState();
+    $("reqBody").appendChild(buildRow(L));
+    recalc();
+  }
+
+  function recalc(){
+    var totHeads = 0, totBill = 0, totGp = 0;
+
+    lines.forEach(function(L){
+      var m = lineMath(L);
+      totHeads += L.heads; totBill += m.weeklyBill; totGp += m.weeklyGp;
+      if (!L.el) return;
+      L.el.querySelector(".c-bill").textContent = money0(m.weeklyBill);
+      var gpc = L.el.querySelector(".c-gp");
+      gpc.textContent = money0(m.weeklyGp);
+      gpc.style.color = m.weeklyGp < 0 ? "var(--flag)" : "var(--green)";
+      var mc = L.el.querySelector(".c-margin");
+      mc.textContent = m.weeklyBill > 0 ? pct(m.margin) : "—";
+      mc.style.color = (m.weeklyBill > 0 && m.margin < 0.10) ? "var(--flag)" : "";
+    });
+
+    $("tHeads").textContent      = totHeads;
+    $("tWeeklyBill").textContent = money0(totBill);
+    $("tWeeklyGp").textContent   = money0(totGp);
+    $("tMargin").textContent     = totBill > 0 ? pct(totGp/totBill) : "—";
+    $("tAnnualGp").textContent   = money0(totGp * num($("weeks"), 48));
+    $("tWeeklyGp").style.color   = totGp < 0 ? "var(--flag)" : "var(--green)";
+  }
+
+  function render(){ renderCard(); recalc(); }
+
+  /* ---------- wiring ---------- */
+  var settingBurden = false;
+
+  function applyScope(){
+    var v = $("scope").value;
+    if (v === "custom") { render(); return; }
+    settingBurden = true;
+    $("burden").value = BURDEN_BY_SCOPE[v];
+    settingBurden = false;
+    render();
+  }
+
+  $("scope").addEventListener("change", applyScope);
+
+  /* A hand-typed burden means the scope rate no longer applies. */
+  $("burden").addEventListener("input", function(){
+    if (!settingBurden && $("scope").value !== "custom") $("scope").value = "custom";
+  });
+
+  ["pay","burden","driver","stHrs","otHrs","otMode","weeks"].forEach(function(id){
+    $(id).addEventListener("input", render);
+    $(id).addEventListener("change", render);
+  });
+  Array.prototype.forEach.call($("modeSegs").children, function(btn){
+    btn.addEventListener("click", function(){ setMode(btn.dataset.mode); });
+  });
+  $("addLine").addEventListener("click", function(){ addLine(false); });
+  $("addFromCard").addEventListener("click", function(){ addLine(true); });
+
+  /* Open with one worked line rather than an empty table. */
+  applyScope();
+  showEmptyState();
+  addLine(true);
+  render();
+})();
+</script>
+</body>
+</html>
