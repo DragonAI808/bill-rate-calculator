@@ -303,8 +303,8 @@
       </div>
 
       <dl class="metrics">
-        <div class="metric"><dt>Gross profit</dt><dd class="gp" id="gpOut">$7.00/hr</dd></div>
-        <div class="metric"><dt>Gross margin</dt><dd id="marginOut">22.6%</dd></div>
+        <div class="metric"><dt>Gross profit $</dt><dd class="gp" id="gpOut">$7.00/hr</dd></div>
+        <div class="metric"><dt>Gross profit %</dt><dd id="marginOut">22.60%</dd></div>
         <div class="metric"><dt>Markup on pay</dt><dd id="markupOut">55.0%</dd></div>
         <div class="metric"><dt>Loaded pay cost</dt><dd id="costOut">$24.00/hr</dd></div>
       </dl>
@@ -384,7 +384,8 @@
   var money0 = function(n){
     return (n < 0 ? "-$" : "$") + Math.abs(n).toLocaleString("en-US",{minimumFractionDigits:0,maximumFractionDigits:0});
   };
-  var pct = function(n){ return (n*100).toFixed(1) + "%"; };
+  var pct  = function(n){ return (n*100).toFixed(1) + "%"; };
+  var pct2 = function(n){ return (n*100).toFixed(2) + "%"; };
   var num = function(el, fallback){
     var v = parseFloat(el.value);
     return isFinite(v) ? v : (fallback || 0);
@@ -458,7 +459,7 @@
 
     $("billOut").innerHTML = (bad ? "&mdash;" : money(r.bill)) + "<small>/hr</small>";
     $("gpOut").textContent     = bad ? "—" : money(r.gp) + "/hr";
-    $("marginOut").textContent = bad ? "—" : pct(r.margin);
+    $("marginOut").textContent = bad ? "—" : pct2(r.margin);
     $("markupOut").textContent = bad ? "—" : pct(r.markup);
     $("costOut").textContent   = money(r.cost) + "/hr";
 
@@ -578,14 +579,14 @@
       gpc.textContent = money0(m.weeklyGp);
       gpc.style.color = m.weeklyGp < 0 ? "var(--flag)" : "var(--green)";
       var mc = L.el.querySelector(".c-margin");
-      mc.textContent = m.weeklyBill > 0 ? pct(m.margin) : "—";
+      mc.textContent = m.weeklyBill > 0 ? pct2(m.margin) : "—";
       mc.style.color = (m.weeklyBill > 0 && m.margin < 0.10) ? "var(--flag)" : "";
     });
 
     $("tHeads").textContent      = totHeads;
     $("tWeeklyBill").textContent = money0(totBill);
     $("tWeeklyGp").textContent   = money0(totGp);
-    $("tMargin").textContent     = totBill > 0 ? pct(totGp/totBill) : "—";
+    $("tMargin").textContent     = totBill > 0 ? pct2(totGp/totBill) : "—";
     $("tAnnualGp").textContent   = money0(totGp * num($("weeks"), 48));
     $("tWeeklyGp").style.color   = totGp < 0 ? "var(--flag)" : "var(--green)";
   }
