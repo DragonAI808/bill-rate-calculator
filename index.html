@@ -78,7 +78,7 @@
     padding:11px 16px;display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 14px;
   }
   .card-hd h2{
-    margin:0;font:600 12px/1.3 var(--sans);
+    margin:0;font:600 14px/1.3 var(--sans);
     text-transform:uppercase;letter-spacing:.1em;color:var(--ink);
   }
   .card-hd .hint{font-size:12.5px;color:var(--ink-soft)}
@@ -350,14 +350,14 @@
       <h2>Order</h2>
       <span class="hint">Priced separately from the rate card.</span>
       <span class="hd-fields">
+        <span class="weeks hd-field">Markup on pay
+          <span class="inputgrp"><input id="orderMarkup" type="number" min="0" step="1" value="45"><span class="u suffix">%</span></span>
+        </span>
         <span class="weeks">OT billing
           <select id="orderOtMode">
             <option value="x15">Bill OT at 1.5x the bill rate</option>
             <option value="cost">Pass OT premium through at cost</option>
           </select>
-        </span>
-        <span class="weeks hd-field">Markup on pay
-          <span class="inputgrp"><input id="orderMarkup" type="number" min="0" step="1" value="45"><span class="u suffix">%</span></span>
         </span>
       </span>
     </div>
