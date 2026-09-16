@@ -85,5 +85,6 @@ Pricing is separate from the rate card. Each line's bill rate is its pay times
 and its burden comes from `BURDEN_BY_SCOPE`. The rate card's markup, margin, bill rate,
 scope, burden and overtime rule do not affect the table; it has its own
 "Order OT billing" setting.
-Changing the order markup or a line's pay reprices the bill rate in place; a
-hand-typed bill rate holds until then.
+Changing the order markup or a line's pay reprices the bill rate in place. Typing a
+line's bill rate locks it (padlock shown) so repricing skips it; clicking the padlock
+unlocks and reprices.

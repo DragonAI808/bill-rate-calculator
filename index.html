@@ -206,6 +206,14 @@
   .btn-quiet{
     border-color:var(--rule);color:var(--ink-soft);padding:4px 9px;font-size:12px;font-weight:400;
   }
+  .bill-wrap{display:flex;align-items:center;gap:4px}
+  td input.locked{border-color:var(--navy);background:var(--navy-tint)}
+  .lock{
+    display:flex;align-items:center;justify-content:center;flex:none;
+    width:22px;height:22px;padding:0;border:0;border-radius:2px;
+    background:transparent;color:var(--navy);cursor:pointer;
+  }
+  .lock:hover{background:var(--navy);color:#fff}
   .btn-x{padding:2px 8px;font-size:17px;line-height:1}
   .btn-quiet:hover{background:var(--flag);border-color:var(--flag);color:#fff}
   .toolbar{
@@ -555,15 +563,28 @@
     { f:"ot",    type:"number", attrs:'min="0" step="1" style="width:64px"' }
   ];
 
+  /* Shown when a line's bill rate was typed by hand. Clicking it unlocks the line
+     and reprices it from the order markup. */
+  var LOCK_BUTTON =
+    '<button class="lock" type="button" hidden title="Bill rate typed by hand, so markup changes skip it. Click to reprice from markup." aria-label="Unlock bill rate and reprice from markup">' +
+    '<svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true"><rect x="3" y="7" width="10" height="7" rx="1" fill="currentColor"/>' +
+    '<path d="M5 7V5a3 3 0 0 1 6 0v2" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></button>';
+
+  function showLock(L){
+    L.el.querySelector(".lock").hidden = !L.locked;
+    L.el.querySelector('[data-f="bill"]').classList.toggle("locked", !!L.locked);
+  }
+
   /* Rows are built once and then updated in place, so typing never steals focus. */
   function buildRow(L){
     var tr = document.createElement("tr");
     var html = "";
     FIELDS.forEach(function(spec){
       var id = 'id="line' + L.id + '-' + spec.f + '" data-f="' + spec.f + '"';
-      html += (spec.type === "select")
-        ? '<td><select ' + id + '>' + SCOPE_OPTIONS + '</select></td>'
-        : '<td><input type="' + spec.type + '" ' + id + ' ' + spec.attrs + '></td>';
+      var field = '<input type="' + spec.type + '" ' + id + ' ' + spec.attrs + '>';
+      if (spec.type === "select") html += '<td><select ' + id + '>' + SCOPE_OPTIONS + '</select></td>';
+      else if (spec.f === "bill") html += '<td><span class="bill-wrap">' + field + LOCK_BUTTON + '</span></td>';
+      else html += '<td>' + field + '</td>';
     });
     html += '<td class="out c-bill"></td><td class="out c-gp"></td><td class="out c-margin"></td>' +
             '<td><button class="btn btn-quiet btn-x" type="button" title="Remove line" aria-label="Remove line">&times;</button></td>';
@@ -577,11 +598,18 @@
       if (dollars) inp.addEventListener("change", function(){ inp.value = L[f].toFixed(2); });
       inp.addEventListener("input", function(){
         L[f] = (f === "role" || f === "scope") ? inp.value : (parseFloat(inp.value) || 0);
+        if (f === "bill") { L.locked = true; showLock(L); }
         if (f === "pay") repriceLine(L);
         recalc();
       });
     });
-    tr.querySelector("button").addEventListener("click", function(){
+    tr.querySelector(".lock").addEventListener("click", function(){
+      L.locked = false;
+      showLock(L);
+      repriceLine(L);
+      recalc();
+    });
+    tr.querySelector(".btn-x").addEventListener("click", function(){
       lines = lines.filter(function(x){ return x.id !== L.id; });
       tr.remove();
       showEmptyState();
@@ -617,6 +645,7 @@
   /* The order table is priced on its own: bill = line pay * (1 + order markup).
      The rate card's markup, margin and burden don't touch it. Updated in place. */
   function repriceLine(L){
+    if (L.locked) return;   // a hand-typed bill rate holds until unlocked
     L.bill = Math.round(L.pay * (1 + num($("orderMarkup"))/100) * 100) / 100;
     if (L.el) L.el.querySelector('[data-f="bill"]').value = L.bill.toFixed(2);
   }
@@ -644,6 +673,7 @@
     $("tMargin").textContent     = totBill > 0 ? pct2(totGp/totBill) : "—";
     $("tAnnualGp").textContent   = money0(totGp * num($("weeks"), 48));
     $("tWeeklyGp").style.color   = totGp < 0 ? "var(--flag)" : "var(--green)";
+    $("tMargin").style.color     = (totBill > 0 && totGp/totBill < 0.10) ? "var(--flag)" : "";
   }
 
   function render(){ renderCard(); recalc(); }
