@@ -540,6 +540,7 @@
       inp.value = L[f];
       inp.addEventListener("input", function(){
         L[f] = (f === "role") ? inp.value : (parseFloat(inp.value) || 0);
+        if (f === "pay") repriceLine(L);
         recalc();
       });
     });
@@ -569,11 +570,22 @@
 
   function addLine(pref){
     var L = blankLine(pref);
+    repriceLine(L);
     lines.push(L);
     showEmptyState();
     $("reqBody").appendChild(buildRow(L));
     recalc();
   }
+
+  /* Reprice a line's bill rate from the rate card's markup, margin or bill rate,
+     using that line's own pay. The input is updated in place. */
+  function repriceLine(L){
+    var bill = price(L.pay, num($("burden")), mode, num($("driver"))).bill;
+    if (!isFinite(bill) || bill <= 0) return;
+    L.bill = Math.round(bill * 100) / 100;
+    if (L.el) L.el.querySelector('[data-f="bill"]').value = L.bill;
+  }
+  function repriceLines(){ lines.forEach(repriceLine); }
 
   function recalc(){
     var totHeads = 0, totBill = 0, totGp = 0;
@@ -610,6 +622,7 @@
     settingBurden = true;
     $("burden").value = BURDEN_BY_SCOPE[v];
     settingBurden = false;
+    repriceLines();
     render();
   }
 
@@ -620,6 +633,11 @@
     if (!settingBurden && $("scope").value !== "custom") $("scope").value = "custom";
   });
 
+  /* Markup, margin, bill rate and burden set every line's bill rate.
+     Registered before render so the totals see the new rates. */
+  ["driver","burden"].forEach(function(id){
+    $(id).addEventListener("input", repriceLines);
+  });
   ["pay","burden","driver","stHrs","otHrs","otMode","weeks"].forEach(function(id){
     $(id).addEventListener("input", render);
     $(id).addEventListener("change", render);
