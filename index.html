@@ -537,7 +537,10 @@
 
     Array.prototype.forEach.call(tr.querySelectorAll("input"), function(inp){
       var f = inp.dataset.f;
-      inp.value = L[f];
+      var dollars = (f === "pay" || f === "bill");
+      inp.value = dollars ? L[f].toFixed(2) : L[f];
+      /* Show two decimals once the field is left, not while typing. */
+      if (dollars) inp.addEventListener("change", function(){ inp.value = L[f].toFixed(2); });
       inp.addEventListener("input", function(){
         L[f] = (f === "role") ? inp.value : (parseFloat(inp.value) || 0);
         if (f === "pay") repriceLine(L);
@@ -583,7 +586,7 @@
     var bill = price(L.pay, num($("burden")), mode, num($("driver"))).bill;
     if (!isFinite(bill) || bill <= 0) return;
     L.bill = Math.round(bill * 100) / 100;
-    if (L.el) L.el.querySelector('[data-f="bill"]').value = L.bill;
+    if (L.el) L.el.querySelector('[data-f="bill"]').value = L.bill.toFixed(2);
   }
   function repriceLines(){ lines.forEach(repriceLine); }
 
