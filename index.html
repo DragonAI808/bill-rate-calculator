@@ -185,9 +185,9 @@
   }
   tfoot tr:last-child th,tfoot tr:last-child td{border-top:1px solid var(--rule)}
   td input{padding:6px 8px;font-size:14px}
-  td input[type=text]{font-family:var(--sans)}
+  td input[type=text]{font-family:var(--sans);min-width:160px}
   .scroller{overflow-x:auto}
-  #orderTable{min-width:820px}
+  #orderTable{min-width:1100px}
   .empty td{padding:20px 16px;text-align:left;font-family:var(--sans);color:var(--ink-soft);font-size:14px;background:var(--panel)}
 
   /* ---------- buttons / toolbar ---------- */
@@ -209,6 +209,8 @@
   }
   .weeks{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ink-mid);margin-left:auto}
   .weeks .inputgrp{width:96px}
+  .weeks-last{margin-left:0}
+  td select{padding:6px 8px;min-width:132px}
 
   /* ---------- alert ---------- */
   .alert{
@@ -336,13 +338,13 @@
   <section class="card">
     <div class="card-hd">
       <h2>Order</h2>
-      <span class="hint">One line per requisition. Job scope and overtime rule above apply to every line.</span>
+      <span class="hint">One line per requisition, priced at the order markup below. Separate from the rate card except the overtime rule.</span>
     </div>
     <div class="scroller">
       <table id="orderTable">
         <thead>
           <tr>
-            <th>Role</th><th>Heads</th><th>Pay $/hr</th><th>Bill $/hr</th>
+            <th>Role</th><th>Job scope</th><th>Heads</th><th>Pay $/hr</th><th>Bill $/hr</th>
             <th>ST hrs</th><th>OT hrs</th><th>Weekly bill</th><th>Weekly GP</th><th>GP %</th><th></th>
           </tr>
         </thead>
@@ -351,6 +353,7 @@
           <tr>
             <th>Order total</th>
             <td id="tHeads">0</td>
+            <td></td>
             <td colspan="4"></td>
             <td id="tWeeklyBill">$0</td>
             <td id="tWeeklyGp">$0</td>
@@ -359,7 +362,7 @@
           </tr>
           <tr>
             <th>Annualized GP</th>
-            <td colspan="8" id="tAnnualGp">$0</td>
+            <td colspan="9" id="tAnnualGp">$0</td>
             <td></td>
           </tr>
         </tfoot>
@@ -368,7 +371,10 @@
     <div class="toolbar">
       <button class="btn btn-primary" id="addFromCard" type="button">Add line from rate card</button>
       <button class="btn" id="addLine" type="button">Add blank line</button>
-      <span class="weeks">Weeks billed
+      <span class="weeks">Order markup on pay
+        <span class="inputgrp"><input id="orderMarkup" type="number" min="0" step="1" value="45"><span class="u suffix">%</span></span>
+      </span>
+      <span class="weeks weeks-last">Weeks billed
         <span class="inputgrp"><input id="weeks" type="number" min="1" max="52" step="1" value="48"></span>
       </span>
     </div>
@@ -497,16 +503,17 @@
     return {
       id: nextId++,
       role: "",
+      scope: pref && BURDEN_BY_SCOPE[$("scope").value] ? $("scope").value : "light-industrial",
       heads: 1,
       pay: pref ? s.pay : 20,
-      bill: pref && isFinite(s.r.bill) ? Math.round(s.r.bill*100)/100 : 31,
+      bill: 0,   // set from the order markup by repriceLine
       st: pref ? num($("stHrs")) : 40,
       ot: pref ? num($("otHrs")) : 0
     };
   }
 
   function lineMath(L){
-    var burden = num($("burden"));
+    var burden = BURDEN_BY_SCOPE[L.scope];
     var cost = L.pay * (1 + burden/100);
     var stGp = L.bill - cost;
     var ot = otFigures(L.pay, burden, L.bill, $("otMode").value);
@@ -515,8 +522,14 @@
     return { weeklyBill:weeklyBill, weeklyGp:weeklyGp, margin: weeklyBill > 0 ? weeklyGp/weeklyBill : 0 };
   }
 
+  var SCOPE_OPTIONS =
+    '<option value="light-industrial">Light industrial</option>' +
+    '<option value="office">Office</option>' +
+    '<option value="light-assembly">Light assembly</option>';
+
   var FIELDS = [
     { f:"role",  type:"text",   attrs:'placeholder="Forklift, 2nd shift"' },
+    { f:"scope", type:"select" },
     { f:"heads", type:"number", attrs:'min="0" step="1" style="width:64px"' },
     { f:"pay",   type:"number", attrs:'min="0" step="0.25" style="width:86px"' },
     { f:"bill",  type:"number", attrs:'min="0" step="0.25" style="width:86px"' },
@@ -529,20 +542,23 @@
     var tr = document.createElement("tr");
     var html = "";
     FIELDS.forEach(function(spec){
-      html += '<td><input type="' + spec.type + '" id="line' + L.id + '-' + spec.f + '" data-f="' + spec.f + '" ' + spec.attrs + '></td>';
+      var id = 'id="line' + L.id + '-' + spec.f + '" data-f="' + spec.f + '"';
+      html += (spec.type === "select")
+        ? '<td><select ' + id + '>' + SCOPE_OPTIONS + '</select></td>'
+        : '<td><input type="' + spec.type + '" ' + id + ' ' + spec.attrs + '></td>';
     });
     html += '<td class="out c-bill"></td><td class="out c-gp"></td><td class="out c-margin"></td>' +
             '<td><button class="btn btn-quiet" type="button">Remove</button></td>';
     tr.innerHTML = html;
 
-    Array.prototype.forEach.call(tr.querySelectorAll("input"), function(inp){
+    Array.prototype.forEach.call(tr.querySelectorAll("input, select"), function(inp){
       var f = inp.dataset.f;
       var dollars = (f === "pay" || f === "bill");
       inp.value = dollars ? L[f].toFixed(2) : L[f];
       /* Show two decimals once the field is left, not while typing. */
       if (dollars) inp.addEventListener("change", function(){ inp.value = L[f].toFixed(2); });
       inp.addEventListener("input", function(){
-        L[f] = (f === "role") ? inp.value : (parseFloat(inp.value) || 0);
+        L[f] = (f === "role" || f === "scope") ? inp.value : (parseFloat(inp.value) || 0);
         if (f === "pay") repriceLine(L);
         recalc();
       });
@@ -564,7 +580,7 @@
     if (!lines.length && !existing){
       var tr = document.createElement("tr");
       tr.className = "empty";
-      tr.innerHTML = '<td colspan="10">No lines yet. Add one to price a multi-req order.</td>';
+      tr.innerHTML = '<td colspan="11">No lines yet. Add one to price a multi-req order.</td>';
       body.appendChild(tr);
     } else if (lines.length && existing){
       existing.remove();
@@ -580,12 +596,10 @@
     recalc();
   }
 
-  /* Reprice a line's bill rate from the rate card's markup, margin or bill rate,
-     using that line's own pay. The input is updated in place. */
+  /* The order table is priced on its own: bill = line pay * (1 + order markup).
+     The rate card's markup, margin and burden don't touch it. Updated in place. */
   function repriceLine(L){
-    var bill = price(L.pay, num($("burden")), mode, num($("driver"))).bill;
-    if (!isFinite(bill) || bill <= 0) return;
-    L.bill = Math.round(bill * 100) / 100;
+    L.bill = Math.round(L.pay * (1 + num($("orderMarkup"))/100) * 100) / 100;
     if (L.el) L.el.querySelector('[data-f="bill"]').value = L.bill.toFixed(2);
   }
   function repriceLines(){ lines.forEach(repriceLine); }
@@ -625,7 +639,6 @@
     settingBurden = true;
     $("burden").value = BURDEN_BY_SCOPE[v];
     settingBurden = false;
-    repriceLines();
     render();
   }
 
@@ -636,11 +649,7 @@
     if (!settingBurden && $("scope").value !== "custom") $("scope").value = "custom";
   });
 
-  /* Markup, margin, bill rate and burden set every line's bill rate.
-     Registered before render so the totals see the new rates. */
-  ["driver","burden"].forEach(function(id){
-    $(id).addEventListener("input", repriceLines);
-  });
+  $("orderMarkup").addEventListener("input", function(){ repriceLines(); recalc(); });
   ["pay","burden","driver","stHrs","otHrs","otMode","weeks"].forEach(function(id){
     $(id).addEventListener("input", render);
     $(id).addEventListener("change", render);

@@ -79,3 +79,10 @@ switches the scope dropdown to "Custom burden".
 Rows are built once and updated in place. Do NOT re-render the whole tbody on input —
 that steals focus and makes the fields untypeable. This was a real bug; keep the
 in-place update pattern.
+
+Pricing is separate from the rate card. Each line's bill rate is its pay times
+(1 + the "Order markup on pay" input, default 45%). Each line has its own job scope,
+and its burden comes from `BURDEN_BY_SCOPE`. The rate card's markup, margin, bill rate,
+scope and burden do not affect the table. Only the rate card's overtime rule is shared.
+Changing the order markup or a line's pay reprices the bill rate in place; a
+hand-typed bill rate holds until then.
