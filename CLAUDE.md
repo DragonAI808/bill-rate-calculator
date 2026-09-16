@@ -83,6 +83,7 @@ in-place update pattern.
 Pricing is separate from the rate card. Each line's bill rate is its pay times
 (1 + the "Order markup on pay" input, default 45%). Each line has its own job scope,
 and its burden comes from `BURDEN_BY_SCOPE`. The rate card's markup, margin, bill rate,
-scope and burden do not affect the table. Only the rate card's overtime rule is shared.
+scope, burden and overtime rule do not affect the table; it has its own
+"Order OT billing" setting.
 Changing the order markup or a line's pay reprices the bill rate in place; a
 hand-typed bill rate holds until then.

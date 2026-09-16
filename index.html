@@ -215,6 +215,9 @@
   .weeks{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ink-mid);margin-left:auto}
   .weeks .inputgrp{width:96px}
   .hd-field .inputgrp{width:130px}
+  .hd-fields{margin-left:auto;display:flex;flex-wrap:wrap;align-items:center;gap:8px 20px}
+  .hd-fields .weeks{margin-left:0}
+  .hd-fields select{width:auto}
   td select{padding:6px 8px;min-width:132px}
 
   /* ---------- alert ---------- */
@@ -345,9 +348,17 @@
   <section class="card">
     <div class="card-hd card-hd-center">
       <h2>Order</h2>
-      <span class="hint">One line per requisition, priced at the order markup. Separate from the rate card except the overtime rule.</span>
-      <span class="weeks hd-field">Order markup on pay
-        <span class="inputgrp"><input id="orderMarkup" type="number" min="0" step="1" value="45"><span class="u suffix">%</span></span>
+      <span class="hint">Priced separately from the rate card.</span>
+      <span class="hd-fields">
+        <span class="weeks">OT billing
+          <select id="orderOtMode">
+            <option value="x15">Bill OT at 1.5x the bill rate</option>
+            <option value="cost">Pass OT premium through at cost</option>
+          </select>
+        </span>
+        <span class="weeks hd-field">Markup on pay
+          <span class="inputgrp"><input id="orderMarkup" type="number" min="0" step="1" value="45"><span class="u suffix">%</span></span>
+        </span>
       </span>
     </div>
     <div class="scroller">
@@ -523,7 +534,7 @@
     var burden = BURDEN_BY_SCOPE[L.scope];
     var cost = L.pay * (1 + burden/100);
     var stGp = L.bill - cost;
-    var ot = otFigures(L.pay, burden, L.bill, $("otMode").value);
+    var ot = otFigures(L.pay, burden, L.bill, $("orderOtMode").value);
     var weeklyBill = (L.bill * L.st + ot.otBill * L.ot) * L.heads;
     var weeklyGp   = (stGp   * L.st + ot.otGp   * L.ot) * L.heads;
     return { weeklyBill:weeklyBill, weeklyGp:weeklyGp, margin: weeklyBill > 0 ? weeklyGp/weeklyBill : 0 };
@@ -657,6 +668,7 @@
   });
 
   $("orderMarkup").addEventListener("input", function(){ repriceLines(); recalc(); });
+  $("orderOtMode").addEventListener("change", recalc);
   ["pay","burden","driver","stHrs","otHrs","otMode","weeks"].forEach(function(id){
     $(id).addEventListener("input", render);
     $(id).addEventListener("change", render);
