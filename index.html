@@ -171,6 +171,7 @@
   thead th:last-child,tbody td:last-child,tfoot td:last-child,tfoot th:last-child{border-right:0}
   thead th:first-child,tbody td:first-child,tfoot th:first-child{text-align:left}
   tbody td:first-child{font-family:var(--sans)}
+  thead th.in{text-align:left}   /* input columns: title sits over the field's left edge */
   tbody tr:nth-child(even) td{background:var(--sunken)}
   td.out{background:var(--navy-tint);font-weight:500}
   tbody tr:nth-child(even) td.out{background:#DFE9F4}
@@ -185,9 +186,9 @@
   }
   tfoot tr:last-child th,tfoot tr:last-child td{border-top:1px solid var(--rule)}
   td input{padding:6px 8px;font-size:14px}
-  td input[type=text]{font-family:var(--sans);min-width:160px}
+  td input[type=text]{font-family:var(--sans);min-width:130px}
   .scroller{overflow-x:auto}
-  #orderTable{min-width:1100px}
+  #orderTable{min-width:900px}
   .empty td{padding:20px 16px;text-align:left;font-family:var(--sans);color:var(--ink-soft);font-size:14px;background:var(--panel)}
 
   /* ---------- buttons / toolbar ---------- */
@@ -202,6 +203,7 @@
   .btn-quiet{
     border-color:var(--rule);color:var(--ink-soft);padding:4px 9px;font-size:12px;font-weight:400;
   }
+  .btn-x{padding:2px 8px;font-size:17px;line-height:1}
   .btn-quiet:hover{background:var(--flag);border-color:var(--flag);color:#fff}
   .toolbar{
     display:flex;gap:10px;align-items:center;flex-wrap:wrap;
@@ -209,7 +211,8 @@
   }
   .weeks{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ink-mid);margin-left:auto}
   .weeks .inputgrp{width:96px}
-  .weeks-last{margin-left:0}
+  .hd-field{align-self:center}
+  .hd-field .inputgrp{width:130px}
   td select{padding:6px 8px;min-width:132px}
 
   /* ---------- alert ---------- */
@@ -338,14 +341,17 @@
   <section class="card">
     <div class="card-hd">
       <h2>Order</h2>
-      <span class="hint">One line per requisition, priced at the order markup below. Separate from the rate card except the overtime rule.</span>
+      <span class="hint">One line per requisition, priced at the order markup. Separate from the rate card except the overtime rule.</span>
+      <span class="weeks hd-field">Order markup on pay
+        <span class="inputgrp"><input id="orderMarkup" type="number" min="0" step="1" value="45"><span class="u suffix">%</span></span>
+      </span>
     </div>
     <div class="scroller">
       <table id="orderTable">
         <thead>
           <tr>
-            <th>Role</th><th>Job scope</th><th>Heads</th><th>Pay $/hr</th><th>Bill $/hr</th>
-            <th>ST hrs</th><th>OT hrs</th><th>Weekly bill</th><th>Weekly GP</th><th>GP %</th><th></th>
+            <th>Role</th><th class="in">Job scope</th><th class="in">Heads</th><th class="in">Pay $/hr</th><th class="in">Bill $/hr</th>
+            <th class="in">ST hrs</th><th class="in">OT hrs</th><th>Weekly bill</th><th>Weekly GP</th><th>GP %</th><th></th>
           </tr>
         </thead>
         <tbody id="reqBody"></tbody>
@@ -371,10 +377,7 @@
     <div class="toolbar">
       <button class="btn btn-primary" id="addFromCard" type="button">Add line from rate card</button>
       <button class="btn" id="addLine" type="button">Add blank line</button>
-      <span class="weeks">Order markup on pay
-        <span class="inputgrp"><input id="orderMarkup" type="number" min="0" step="1" value="45"><span class="u suffix">%</span></span>
-      </span>
-      <span class="weeks weeks-last">Weeks billed
+      <span class="weeks">Weeks billed
         <span class="inputgrp"><input id="weeks" type="number" min="1" max="52" step="1" value="48"></span>
       </span>
     </div>
@@ -548,7 +551,7 @@
         : '<td><input type="' + spec.type + '" ' + id + ' ' + spec.attrs + '></td>';
     });
     html += '<td class="out c-bill"></td><td class="out c-gp"></td><td class="out c-margin"></td>' +
-            '<td><button class="btn btn-quiet" type="button">Remove</button></td>';
+            '<td><button class="btn btn-quiet btn-x" type="button" title="Remove line" aria-label="Remove line">&times;</button></td>';
     tr.innerHTML = html;
 
     Array.prototype.forEach.call(tr.querySelectorAll("input, select"), function(inp){
