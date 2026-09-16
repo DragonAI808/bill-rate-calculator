@@ -268,7 +268,7 @@
         <label for="driver" id="driverLabel">Markup on pay</label>
         <div class="inputgrp">
           <span class="u" id="driverPrefix" hidden>$</span>
-          <input id="driver" type="number" min="0" step="1" value="55">
+          <input id="driver" type="number" min="0" step="1" value="45">
           <span class="u suffix" id="driverSuffix">%</span>
         </div>
       </div>
@@ -430,17 +430,18 @@
   }
 
   /* ---------- rate card ---------- */
-  var driverDefaults = { markup:55, margin:25, bill:31 };
+  var driverValues = { markup:45, margin:25, bill:31 };  // last value typed in each mode
   var driverLabels = { markup:"Markup on pay", margin:"Target gross margin", bill:"Bill rate from client" };
 
   function setMode(m){
+    driverValues[mode] = $("driver").value;
     mode = m;
     Array.prototype.forEach.call($("modeSegs").children, function(btn){
       btn.setAttribute("aria-pressed", btn.dataset.mode === m ? "true" : "false");
     });
     $("driverLabel").textContent = driverLabels[m];
     $("driver").step  = (m === "bill") ? "0.25" : "1";
-    $("driver").value = driverDefaults[m];
+    $("driver").value = driverValues[m];
     $("driverPrefix").hidden = (m !== "bill");
     $("driverSuffix").textContent = (m === "bill") ? "/hr" : "%";
     render();
