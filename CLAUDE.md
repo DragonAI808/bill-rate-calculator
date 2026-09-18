@@ -98,3 +98,16 @@ GRIP shows 3% and 4% of PGP $, whole dollars, separated by a slash. In GRIP view
 last row reads "Monthly PGP $": total PGP * weeks billed / 12, because GRIP pays out
 monthly. Nothing
 outside the order table changes.
+
+## Order table toolbar
+
+- **Copy order** puts the table on the clipboard as tab-separated rows (header, lines,
+  order total, the monthly or annualized line, plus weeks billed and the OT rule), so it
+  pastes into Outlook or Excel. Columns follow the current view. If the browser refuses
+  the clipboard, the text appears in an overlay, selected, to copy by hand.
+- **Print** (and Ctrl+P) uses the print rules: the rate card, result panel, toolbar and the
+  row buttons are hidden, and in GRIP view the GRIP column and Monthly GRIP are hidden too,
+  since commission figures should not reach a client sheet.
+- The ⧉ button on a row duplicates it directly below; rows stay independent afterwards.
+- In GRIP view the last row shows Monthly PGP $ and, beside it, Monthly GRIP: 3% / 4% of
+  that monthly figure.

@@ -214,6 +214,9 @@
     border-color:var(--rule);color:var(--ink-soft);padding:4px 9px;font-size:12px;font-weight:400;
   }
   .btn-x{padding:2px 8px;font-size:17px;line-height:1}
+  .btn-dup{padding:2px 7px;font-size:15px;line-height:1}
+  .btn-dup:hover{background:var(--navy);border-color:var(--navy);color:#fff}
+  .row-actions{white-space:nowrap;display:flex;gap:4px;justify-content:flex-end}
   .btn-quiet:hover{background:var(--flag);border-color:var(--flag);color:#fff}
   .toolbar{
     display:flex;gap:10px;align-items:center;flex-wrap:wrap;
@@ -226,6 +229,40 @@
   .hd-fields .weeks{margin-left:0}
   .hd-fields select{width:auto}
   td select{padding:6px 6px;min-width:92px;font-size:13.5px}
+
+  /* Shown only when the browser refuses to copy for us. */
+  .copybox{
+    position:fixed;inset:0;z-index:20;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;gap:10px;padding:24px;
+    background:rgba(22,33,46,.55);
+  }
+  .copybox p{margin:0;color:#fff;font-size:14px}
+  .copybox textarea{
+    width:min(760px,100%);height:min(50vh,360px);padding:10px;
+    border:1px solid var(--rule);border-radius:2px;background:var(--panel);
+    font:400 12.5px/1.5 var(--mono);white-space:pre;
+  }
+
+  /* ---------- print: the order table alone ---------- */
+  @media print{
+    body{background:#fff;padding:0;font-size:12px}
+    .masthead{background:#fff;color:var(--ink);border-bottom:2px solid var(--ink);padding:0 0 8px}
+    .masthead h1{color:var(--ink);font-size:20px}
+    .masthead .stamp{color:var(--ink-soft)}
+    .cols,.divider,.toolbar,.alert,#gripToggle{display:none!important}
+    .card{border:0;box-shadow:none}
+    .card-hd{background:#fff;border-bottom:1px solid var(--ink-soft);padding:8px 0}
+    .scroller{overflow:visible}
+    #orderTable{min-width:0}
+    thead th{background:#fff}
+    tbody td,tfoot th,tfoot td{background:#fff!important}
+    td input,td select{border-color:var(--rule);padding:2px 4px}
+    .row-actions{display:none}      /* duplicate and remove buttons */
+    thead th:last-child{display:none}
+    tfoot tr td:last-child{display:none}
+    /* GRIP is an internal commission figure, so it stays off the printed sheet. */
+    body.grip #hOut3,body.grip td.c-margin,body.grip #tMargin,body.grip #tMonthlyGrip{display:none}
+  }
 
   /* ---------- alert ---------- */
   .alert{
@@ -389,7 +426,8 @@
           </tr>
           <tr>
             <th id="tAnnualLabel">Annualized GP</th>
-            <td colspan="10" id="tAnnualGp">$0</td>
+            <td colspan="9" id="tAnnualGp">$0</td>
+            <td id="tMonthlyGrip"></td>
             <td></td>
           </tr>
         </tfoot>
@@ -397,6 +435,8 @@
     </div>
     <div class="toolbar">
       <button class="btn btn-primary" id="addLine" type="button">Add blank line</button>
+      <button class="btn" id="copyOrder" type="button">Copy order</button>
+      <button class="btn" id="printOrder" type="button">Print</button>
       <span class="weeks">Weeks billed
         <span class="inputgrp"><input id="weeks" type="number" min="1" max="52" step="1" value="48"></span>
       </span>
@@ -588,7 +628,9 @@
         : '<td>' + field + '</td>';
     });
     html += '<td class="out c-bill"></td><td class="out c-gp"></td><td class="out c-margin"></td>' +
-            '<td><button class="btn btn-quiet btn-x" type="button" title="Remove line" aria-label="Remove line">&times;</button></td>';
+            '<td class="row-actions">' +
+            '<button class="btn btn-quiet btn-dup" type="button" title="Duplicate line" aria-label="Duplicate line">&#10697;</button>' +
+            '<button class="btn btn-quiet btn-x" type="button" title="Remove line" aria-label="Remove line">&times;</button></td>';
     tr.innerHTML = html;
 
     Array.prototype.forEach.call(tr.querySelectorAll("input, select"), function(inp){
@@ -603,6 +645,15 @@
         else if (f === "pay" || f === "markup") repriceLine(L);
         recalc();
       });
+    });
+    tr.querySelector(".btn-dup").addEventListener("click", function(){
+      var copy = {};
+      Object.keys(L).forEach(function(k){ if (k !== "id" && k !== "el") copy[k] = L[k]; });
+      copy.id = nextId++;
+      var at = lines.indexOf(L) + 1;
+      lines.splice(at, 0, copy);
+      tr.parentNode.insertBefore(buildRow(copy), tr.nextSibling);
+      recalc();
     });
     tr.querySelector(".btn-x").addEventListener("click", function(){
       lines = lines.filter(function(x){ return x.id !== L.id; });
@@ -683,7 +734,9 @@
     var weeks = num($("weeks"), 48);
     $("tHeads").textContent    = totHeads;
     /* GRIP pays out monthly, so PGP is shown for a month: a twelfth of the year. */
-    $("tAnnualGp").textContent = grip ? money0(totPgp * weeks / 12) : money0(totGp * weeks);
+    var monthlyPgp = totPgp * weeks / 12;
+    $("tAnnualGp").textContent   = grip ? money0(monthlyPgp) : money0(totGp * weeks);
+    $("tMonthlyGrip").textContent = grip ? gripPair(monthlyPgp) : "";
 
     if (grip){
       $("tWeeklyBill").textContent = money0(totGp);
@@ -706,6 +759,7 @@
      3% / 4% GRIP pair. The inputs and every other figure stay put. */
   function setGrip(on){
     grip = on;
+    document.body.classList.toggle("grip", on);
     $("hOut1").textContent = on ? "Weekly GP" : "Weekly bill";
     $("hOut2").textContent = on ? "PGP $"     : "Weekly GP";
     $("hOut3").innerHTML   = on ? 'GRIP<span class="sub">3% / 4%</span>' : "GP %";
@@ -748,6 +802,77 @@
     btn.addEventListener("click", function(){ setMode(btn.dataset.mode); });
   });
   $("addLine").addEventListener("click", function(){ addLine(false); });
+  $("printOrder").addEventListener("click", function(){ window.print(); });
+
+  /* Tab-separated so it pastes into Outlook or Excel as a real table.
+     Columns follow whichever view is on screen. */
+  var SCOPE_NAMES = { "light-industrial":"Light industrial", "office":"Office", "light-assembly":"Light assembly" };
+
+  function orderAsText(){
+    var weeks = num($("weeks"), 48);
+    var head = ["Role","Job scope","Heads","Pay $/hr","Markup %","Bill $/hr","ST hrs","OT hrs"]
+      .concat(grip ? ["Weekly GP","PGP $","GRIP 3% / 4%"] : ["Weekly bill","Weekly GP","GP %"]);
+    var rows = [head.join("\t")];
+    var totHeads = 0, totBill = 0, totGp = 0, totPgp = 0;
+
+    lines.forEach(function(L){
+      var m = lineMath(L), pgp = pgpDollars(L);
+      totHeads += L.heads; totBill += m.weeklyBill; totGp += m.weeklyGp; totPgp += pgp;
+      rows.push([
+        L.role || "", SCOPE_NAMES[L.scope], L.heads, L.pay.toFixed(2), L.markup, L.bill.toFixed(2), L.st, L.ot
+      ].concat(grip
+        ? [money0(m.weeklyGp), money0(pgp), gripPair(pgp)]
+        : [money0(m.weeklyBill), money0(m.weeklyGp), m.weeklyBill > 0 ? pct2(m.margin) : "—"]
+      ).join("\t"));
+    });
+
+    rows.push(["Order total","",totHeads,"","","","",""].concat(grip
+      ? [money0(totGp), money0(totPgp), gripPair(totPgp)]
+      : [money0(totBill), money0(totGp), totBill > 0 ? pct2(totGp/totBill) : "—"]
+    ).join("\t"));
+
+    var monthlyPgp = totPgp * weeks / 12;
+    rows.push(grip
+      ? "Monthly PGP $\t" + money0(monthlyPgp) + "\tMonthly GRIP\t" + gripPair(monthlyPgp)
+      : "Annualized GP\t" + money0(totGp * weeks));
+    rows.push("Weeks billed\t" + weeks + "\tOT billing\t" +
+      ($("orderOtMode").value === "x15" ? "OT at 1.5x the bill rate" : "OT premium passed through at cost"));
+    return rows.join("\n");
+  }
+
+  $("copyOrder").addEventListener("click", function(){
+    var btn = this, text = orderAsText();
+    function done(ok){
+      btn.textContent = ok ? "Copied" : "Press Ctrl+C";
+      setTimeout(function(){ btn.textContent = "Copy order"; }, 1800);
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(text).then(function(){ done(true); }, function(){ fallback(); });
+    } else fallback();
+
+    /* Some browsers block the clipboard API. Try the old copy command, and if that
+       is refused too, leave the text on screen, selected, to copy by hand. */
+    function fallback(){
+      var box = document.createElement("div");
+      box.className = "copybox";
+      box.innerHTML = '<p>Press Ctrl+C to copy, then Esc to close.</p><textarea readonly></textarea>';
+      var ta = box.querySelector("textarea");
+      ta.value = text;
+      document.body.appendChild(box);
+      ta.focus(); ta.select();
+      var ok = false;
+      try { ok = document.execCommand("copy"); } catch (e) { ok = false; }
+      if (ok) { box.remove(); done(true); return; }
+      done(false);
+      function close(e){
+        if (e.type === "keydown" && e.key !== "Escape") return;
+        box.remove();
+        document.removeEventListener("keydown", close);
+      }
+      document.addEventListener("keydown", close);
+      box.addEventListener("click", function(e){ if (e.target === box) close(e); });
+    }
+  });
 
   /* Open with one worked line rather than an empty table. */
   applyScope();
