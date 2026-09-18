@@ -164,13 +164,13 @@
   /* ---------- tables ---------- */
   table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
   thead th{
-    background:var(--band);padding:8px 10px;text-align:right;
+    background:var(--band);padding:8px 8px;text-align:right;
     font:500 10.5px/1.25 var(--sans);text-transform:uppercase;letter-spacing:.07em;
     color:var(--ink-soft);border-bottom:1px solid var(--rule-strong);
     border-right:1px solid var(--rule-soft);
   }
   tbody td{
-    padding:7px 10px;text-align:right;font:400 14px/1.3 var(--mono);
+    padding:6px 8px;text-align:right;font:400 14px/1.3 var(--mono);
     border-bottom:1px solid var(--rule-soft);border-right:1px solid var(--rule-soft);
   }
   thead th:last-child,tbody td:last-child,tfoot td:last-child,tfoot th:last-child{border-right:0}
@@ -190,8 +190,8 @@
     text-transform:uppercase;letter-spacing:.08em;color:var(--ink-mid);
   }
   tfoot tr:last-child th,tfoot tr:last-child td{border-top:1px solid var(--rule)}
-  td input{padding:6px 8px;font-size:14px}
-  td input[type=text]{font-family:var(--sans);min-width:130px}
+  td input{padding:6px 7px;font-size:13.5px}
+  td input[type=text]{font-family:var(--sans);min-width:120px}
   .scroller{overflow-x:auto}
   #orderTable{min-width:900px}
   .empty td{padding:20px 16px;text-align:left;font-family:var(--sans);color:var(--ink-soft);font-size:14px;background:var(--panel)}
@@ -208,14 +208,6 @@
   .btn-quiet{
     border-color:var(--rule);color:var(--ink-soft);padding:4px 9px;font-size:12px;font-weight:400;
   }
-  .bill-wrap{display:flex;align-items:center;gap:4px}
-  td input.locked{border-color:var(--navy);background:var(--navy-tint)}
-  .lock{
-    display:flex;align-items:center;justify-content:center;flex:none;
-    width:22px;height:22px;padding:0;border:0;border-radius:2px;
-    background:transparent;color:var(--navy);cursor:pointer;
-  }
-  .lock:hover{background:var(--navy);color:#fff}
   .btn-x{padding:2px 8px;font-size:17px;line-height:1}
   .btn-quiet:hover{background:var(--flag);border-color:var(--flag);color:#fff}
   .toolbar{
@@ -228,7 +220,7 @@
   .hd-fields{margin-left:auto;display:flex;flex-wrap:wrap;align-items:center;gap:8px 20px}
   .hd-fields .weeks{margin-left:0}
   .hd-fields select{width:auto}
-  td select{padding:6px 8px;min-width:132px}
+  td select{padding:6px 6px;min-width:124px;font-size:13.5px}
 
   /* ---------- alert ---------- */
   .alert{
@@ -361,9 +353,6 @@
       <h2>Order</h2>
       <span class="hint">Priced separately from the rate card.</span>
       <span class="hd-fields">
-        <span class="weeks hd-field">Markup on pay
-          <span class="inputgrp"><input id="orderMarkup" type="number" min="0" step="1" value="45"><span class="u suffix">%</span></span>
-        </span>
         <span class="weeks">OT billing
           <select id="orderOtMode">
             <option value="x15">Bill OT at 1.5x the bill rate</option>
@@ -376,7 +365,7 @@
       <table id="orderTable">
         <thead>
           <tr>
-            <th>Role</th><th class="in">Job scope</th><th class="in">Heads</th><th class="in">Pay $/hr</th><th class="in">Bill $/hr</th>
+            <th>Role</th><th class="in">Job scope</th><th class="in">Heads</th><th class="in">Pay $/hr</th><th class="in">Markup</th><th class="in">Bill $/hr</th>
             <th class="in">ST hrs</th><th class="in">OT hrs</th><th>Weekly bill</th><th>Weekly GP</th><th>GP %</th><th></th>
           </tr>
         </thead>
@@ -386,7 +375,7 @@
             <th>Order total</th>
             <td id="tHeads">0</td>
             <td></td>
-            <td colspan="4"></td>
+            <td colspan="5"></td>
             <td id="tWeeklyBill">$0</td>
             <td id="tWeeklyGp">$0</td>
             <td id="tMargin">&mdash;</td>
@@ -394,7 +383,7 @@
           </tr>
           <tr>
             <th>Annualized GP</th>
-            <td colspan="9" id="tAnnualGp">$0</td>
+            <td colspan="10" id="tAnnualGp">$0</td>
             <td></td>
           </tr>
         </tfoot>
@@ -526,6 +515,8 @@
   }
 
   /* ---------- order lines ---------- */
+  var DEFAULT_MARKUP = 45;
+
   function blankLine(pref){
     var s = cardState();
     return {
@@ -534,7 +525,8 @@
       scope: pref && BURDEN_BY_SCOPE[$("scope").value] ? $("scope").value : "light-industrial",
       heads: 1,
       pay: pref ? s.pay : 20,
-      bill: 0,   // set from the order markup by repriceLine
+      markup: DEFAULT_MARKUP,
+      bill: 0,   // set from the line's markup by repriceLine
       st: pref ? num($("stHrs")) : 40,
       ot: pref ? num($("otHrs")) : 0
     };
@@ -559,23 +551,12 @@
     { f:"role",  type:"text",   attrs:'placeholder="Position"' },
     { f:"scope", type:"select" },
     { f:"heads", type:"number", attrs:'min="0" step="1" style="width:64px"' },
-    { f:"pay",   type:"number", attrs:'min="0" step="0.25" style="width:86px"' },
-    { f:"bill",  type:"number", attrs:'min="0" step="0.25" style="width:86px"' },
+    { f:"pay",    type:"number", attrs:'min="0" step="0.25" style="width:78px"' },
+    { f:"markup", type:"number", attrs:'min="0" step="1" style="width:66px"' },
+    { f:"bill",   type:"number", attrs:'min="0" step="0.25" style="width:78px"' },
     { f:"st",    type:"number", attrs:'min="0" step="1" style="width:64px"' },
     { f:"ot",    type:"number", attrs:'min="0" step="1" style="width:64px"' }
   ];
-
-  /* Shown when a line's bill rate was typed by hand. Clicking it unlocks the line
-     and reprices it from the order markup. */
-  var LOCK_BUTTON =
-    '<button class="lock" type="button" hidden title="Bill rate typed by hand, so markup changes skip it. Click to reprice from markup." aria-label="Unlock bill rate and reprice from markup">' +
-    '<svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true"><rect x="3" y="7" width="10" height="7" rx="1" fill="currentColor"/>' +
-    '<path d="M5 7V5a3 3 0 0 1 6 0v2" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></button>';
-
-  function showLock(L){
-    L.el.querySelector(".lock").hidden = !L.locked;
-    L.el.querySelector('[data-f="bill"]').classList.toggle("locked", !!L.locked);
-  }
 
   /* Rows are built once and then updated in place, so typing never steals focus. */
   function buildRow(L){
@@ -584,9 +565,9 @@
     FIELDS.forEach(function(spec){
       var id = 'id="line' + L.id + '-' + spec.f + '" data-f="' + spec.f + '"';
       var field = '<input type="' + spec.type + '" ' + id + ' ' + spec.attrs + '>';
-      if (spec.type === "select") html += '<td><select ' + id + '>' + SCOPE_OPTIONS + '</select></td>';
-      else if (spec.f === "bill") html += '<td><span class="bill-wrap">' + field + LOCK_BUTTON + '</span></td>';
-      else html += '<td>' + field + '</td>';
+      html += (spec.type === "select")
+        ? '<td><select ' + id + '>' + SCOPE_OPTIONS + '</select></td>'
+        : '<td>' + field + '</td>';
     });
     html += '<td class="out c-bill"></td><td class="out c-gp"></td><td class="out c-margin"></td>' +
             '<td><button class="btn btn-quiet btn-x" type="button" title="Remove line" aria-label="Remove line">&times;</button></td>';
@@ -600,16 +581,10 @@
       if (dollars) inp.addEventListener("change", function(){ inp.value = L[f].toFixed(2); });
       inp.addEventListener("input", function(){
         L[f] = (f === "role" || f === "scope") ? inp.value : (parseFloat(inp.value) || 0);
-        if (f === "bill") { L.locked = true; showLock(L); }
-        if (f === "pay") repriceLine(L);
+        if (f === "bill") readBackMarkup(L);
+        else if (f === "pay" || f === "markup") repriceLine(L);
         recalc();
       });
-    });
-    tr.querySelector(".lock").addEventListener("click", function(){
-      L.locked = false;
-      showLock(L);
-      repriceLine(L);
-      recalc();
     });
     tr.querySelector(".btn-x").addEventListener("click", function(){
       lines = lines.filter(function(x){ return x.id !== L.id; });
@@ -628,7 +603,7 @@
     if (!lines.length && !existing){
       var tr = document.createElement("tr");
       tr.className = "empty";
-      tr.innerHTML = '<td colspan="11">No lines yet. Add one to price a multi-req order.</td>';
+      tr.innerHTML = '<td colspan="12">No lines yet. Add one to price a multi-req order.</td>';
       body.appendChild(tr);
     } else if (lines.length && existing){
       existing.remove();
@@ -644,14 +619,19 @@
     recalc();
   }
 
-  /* The order table is priced on its own: bill = line pay * (1 + order markup).
-     The rate card's markup, margin and burden don't touch it. Updated in place. */
+  /* Each line carries its own markup: bill = line pay * (1 + line markup).
+     The rate card doesn't touch the table. Fields are updated in place. */
   function repriceLine(L){
-    if (L.locked) return;   // a hand-typed bill rate holds until unlocked
-    L.bill = Math.round(L.pay * (1 + num($("orderMarkup"))/100) * 100) / 100;
+    L.bill = Math.round(L.pay * (1 + L.markup/100) * 100) / 100;
     if (L.el) L.el.querySelector('[data-f="bill"]').value = L.bill.toFixed(2);
   }
-  function repriceLines(){ lines.forEach(repriceLine); }
+
+  /* A bill rate typed by hand is kept, and shown as the markup it implies. */
+  function readBackMarkup(L){
+    if (L.pay <= 0) return;
+    L.markup = Math.round((L.bill / L.pay - 1) * 1000) / 10;
+    if (L.el) L.el.querySelector('[data-f="markup"]').value = L.markup;
+  }
 
   function recalc(){
     var totHeads = 0, totBill = 0, totGp = 0;
@@ -699,7 +679,6 @@
     if (!settingBurden && $("scope").value !== "custom") $("scope").value = "custom";
   });
 
-  $("orderMarkup").addEventListener("input", function(){ repriceLines(); recalc(); });
   $("orderOtMode").addEventListener("change", recalc);
   ["pay","burden","driver","stHrs","otHrs","otMode","weeks"].forEach(function(id){
     $(id).addEventListener("input", render);

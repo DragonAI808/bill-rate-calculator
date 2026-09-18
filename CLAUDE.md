@@ -80,11 +80,10 @@ Rows are built once and updated in place. Do NOT re-render the whole tbody on in
 that steals focus and makes the fields untypeable. This was a real bug; keep the
 in-place update pattern.
 
-Pricing is separate from the rate card. Each line's bill rate is its pay times
-(1 + the "Order markup on pay" input, default 45%). Each line has its own job scope,
-and its burden comes from `BURDEN_BY_SCOPE`. The rate card's markup, margin, bill rate,
-scope, burden and overtime rule do not affect the table; it has its own
-"Order OT billing" setting.
-Changing the order markup or a line's pay reprices the bill rate in place. Typing a
-line's bill rate locks it (padlock shown) so repricing skips it; clicking the padlock
-unlocks and reprices.
+Pricing is separate from the rate card. Each line carries its own markup column
+(new lines start at `DEFAULT_MARKUP`, 45%) and its own job scope, whose burden comes
+from `BURDEN_BY_SCOPE`. Bill rate is pay * (1 + that line's markup). The rate card's
+markup, margin, bill rate, scope, burden and overtime rule do not affect the table;
+it has its own "OT billing" setting.
+Editing a line's pay or markup reprices its bill rate in place. Typing a bill rate
+instead reads back as that line's markup, so the two always agree.
