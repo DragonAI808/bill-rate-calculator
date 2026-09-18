@@ -682,7 +682,8 @@
 
     var weeks = num($("weeks"), 48);
     $("tHeads").textContent    = totHeads;
-    $("tAnnualGp").textContent = money0((grip ? totPgp : totGp) * weeks);
+    /* GRIP pays out monthly, so PGP is shown for a month: a twelfth of the year. */
+    $("tAnnualGp").textContent = grip ? money0(totPgp * weeks / 12) : money0(totGp * weeks);
 
     if (grip){
       $("tWeeklyBill").textContent = money0(totGp);
@@ -708,7 +709,7 @@
     $("hOut1").textContent = on ? "Weekly GP" : "Weekly bill";
     $("hOut2").textContent = on ? "PGP $"     : "Weekly GP";
     $("hOut3").innerHTML   = on ? 'GRIP<span class="sub">3% / 4%</span>' : "GP %";
-    $("tAnnualLabel").textContent = on ? "Annualized PGP $" : "Annualized GP";
+    $("tAnnualLabel").textContent = on ? "Monthly PGP $" : "Annualized GP";
     var b = $("gripToggle");
     b.textContent = on ? "Normal" : "GRIP";
     b.setAttribute("aria-pressed", on ? "true" : "false");
