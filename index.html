@@ -292,6 +292,11 @@
       </div>
 
       <div class="frow">
+        <label for="stHrs">Straight hours / wk</label>
+        <div class="inputgrp"><input id="stHrs" type="number" min="0" step="1" value="40"><span class="u suffix">hrs</span></div>
+      </div>
+
+      <div class="frow">
         <label for="otMode">Overtime billing</label>
         <select id="otMode">
           <option value="x15">Bill OT at 1.5x the bill rate</option>
@@ -299,10 +304,6 @@
         </select>
       </div>
 
-      <div class="frow">
-        <label for="stHrs">Straight hours / wk</label>
-        <div class="inputgrp"><input id="stHrs" type="number" min="0" step="1" value="40"><span class="u suffix">hrs</span></div>
-      </div>
 
       <div class="frow">
         <label for="otHrs">OT hours / wk</label>
@@ -398,8 +399,7 @@
       </table>
     </div>
     <div class="toolbar">
-      <button class="btn btn-primary" id="addFromCard" type="button">Add line from rate card</button>
-      <button class="btn" id="addLine" type="button">Add blank line</button>
+      <button class="btn btn-primary" id="addLine" type="button">Add blank line</button>
       <span class="weeks">Weeks billed
         <span class="inputgrp"><input id="weeks" type="number" min="1" max="52" step="1" value="48"></span>
       </span>
@@ -554,7 +554,7 @@
     '<option value="light-assembly">Light assembly</option>';
 
   var FIELDS = [
-    { f:"role",  type:"text",   attrs:'placeholder="Forklift, 2nd shift"' },
+    { f:"role",  type:"text",   attrs:'placeholder="Position"' },
     { f:"scope", type:"select" },
     { f:"heads", type:"number", attrs:'min="0" step="1" style="width:64px"' },
     { f:"pay",   type:"number", attrs:'min="0" step="0.25" style="width:86px"' },
@@ -707,7 +707,6 @@
     btn.addEventListener("click", function(){ setMode(btn.dataset.mode); });
   });
   $("addLine").addEventListener("click", function(){ addLine(false); });
-  $("addFromCard").addEventListener("click", function(){ addLine(true); });
 
   /* Open with one worked line rather than an empty table. */
   applyScope();
