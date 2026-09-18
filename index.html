@@ -224,7 +224,7 @@
   .hd-fields{margin-left:auto;display:flex;flex-wrap:wrap;align-items:center;gap:8px 20px}
   .hd-fields .weeks{margin-left:0}
   .hd-fields select{width:auto}
-  td select{padding:6px 6px;min-width:112px;font-size:13.5px}
+  td select{padding:6px 6px;min-width:92px;font-size:13.5px}
 
   /* ---------- alert ---------- */
   .alert{
@@ -546,10 +546,11 @@
     return { weeklyBill:weeklyBill, weeklyGp:weeklyGp, margin: weeklyBill > 0 ? weeklyGp/weeklyBill : 0 };
   }
 
+  /* Short labels so the column stays narrow. The rate card spells them out. */
   var SCOPE_OPTIONS =
-    '<option value="light-industrial">Light industrial</option>' +
+    '<option value="light-industrial">LID</option>' +
     '<option value="office">Office</option>' +
-    '<option value="light-assembly">Light assembly</option>';
+    '<option value="light-assembly">LtAssembly</option>';
 
   var FIELDS = [
     { f:"role",  type:"text",   attrs:'placeholder="Position"' },
