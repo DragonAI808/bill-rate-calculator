@@ -176,6 +176,7 @@
   thead th:last-child,tbody td:last-child,tfoot td:last-child,tfoot th:last-child{border-right:0}
   thead th:first-child,tbody td:first-child,tfoot th:first-child{text-align:left}
   tbody td:first-child{font-family:var(--sans)}
+  thead th .sub{display:block;font-weight:400;letter-spacing:.04em;text-transform:none}
   thead th.in{text-align:left}   /* input columns: title sits over the field's left edge */
   tbody tr:nth-child(even) td{background:var(--sunken)}
   td.out{background:var(--navy-tint);font-weight:500;white-space:nowrap}
@@ -387,7 +388,7 @@
             <td></td>
           </tr>
           <tr>
-            <th>Annualized GP</th>
+            <th id="tAnnualLabel">Annualized GP</th>
             <td colspan="10" id="tAnnualGp">$0</td>
             <td></td>
           </tr>
@@ -679,8 +680,9 @@
       }
     });
 
+    var weeks = num($("weeks"), 48);
     $("tHeads").textContent    = totHeads;
-    $("tAnnualGp").textContent = money0(totGp * num($("weeks"), 48));
+    $("tAnnualGp").textContent = money0((grip ? totPgp : totGp) * weeks);
 
     if (grip){
       $("tWeeklyBill").textContent = money0(totGp);
@@ -705,7 +707,8 @@
     grip = on;
     $("hOut1").textContent = on ? "Weekly GP" : "Weekly bill";
     $("hOut2").textContent = on ? "PGP $"     : "Weekly GP";
-    $("hOut3").textContent = on ? "GRIP"      : "GP %";
+    $("hOut3").innerHTML   = on ? 'GRIP<span class="sub">3% / 4%</span>' : "GP %";
+    $("tAnnualLabel").textContent = on ? "Annualized PGP $" : "Annualized GP";
     var b = $("gripToggle");
     b.textContent = on ? "Normal" : "GRIP";
     b.setAttribute("aria-pressed", on ? "true" : "false");

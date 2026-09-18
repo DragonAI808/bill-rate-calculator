@@ -94,5 +94,6 @@ PGP $ and GRIP, and reads "Normal" while on. PGP $ uses its own rounded burdens 
 
     PGP $ = (bill - pay * (1 + grip burden/100)) * (ST hrs + OT hrs) * heads
 
-GRIP shows 3% and 4% of PGP $, whole dollars, separated by a slash. Nothing else on
-the page changes, including Annualized GP.
+GRIP shows 3% and 4% of PGP $, whole dollars, separated by a slash. In GRIP view the
+last row reads "Annualized PGP $" and multiplies total PGP by weeks billed. Nothing
+outside the order table changes.
