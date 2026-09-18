@@ -191,7 +191,11 @@
   }
   tfoot tr:last-child th,tfoot tr:last-child td{border-top:1px solid var(--rule)}
   td input{padding:6px 7px;font-size:13.5px}
-  td input[type=text]{font-family:var(--sans);min-width:120px}
+  /* No spinners in the table: the arrows crowd the cents out of the field. */
+  td input[type=number]{-moz-appearance:textfield}
+  td input[type=number]::-webkit-outer-spin-button,
+  td input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+  td input[type=text]{font-family:var(--sans);min-width:100px}
   .scroller{overflow-x:auto}
   #orderTable{min-width:900px}
   .empty td{padding:20px 16px;text-align:left;font-family:var(--sans);color:var(--ink-soft);font-size:14px;background:var(--panel)}
@@ -220,7 +224,7 @@
   .hd-fields{margin-left:auto;display:flex;flex-wrap:wrap;align-items:center;gap:8px 20px}
   .hd-fields .weeks{margin-left:0}
   .hd-fields select{width:auto}
-  td select{padding:6px 6px;min-width:124px;font-size:13.5px}
+  td select{padding:6px 6px;min-width:112px;font-size:13.5px}
 
   /* ---------- alert ---------- */
   .alert{
@@ -550,12 +554,12 @@
   var FIELDS = [
     { f:"role",  type:"text",   attrs:'placeholder="Position"' },
     { f:"scope", type:"select" },
-    { f:"heads", type:"number", attrs:'min="0" step="1" style="width:64px"' },
-    { f:"pay",    type:"number", attrs:'min="0" step="0.25" style="width:78px"' },
-    { f:"markup", type:"number", attrs:'min="0" step="1" style="width:66px"' },
-    { f:"bill",   type:"number", attrs:'min="0" step="0.25" style="width:78px"' },
-    { f:"st",    type:"number", attrs:'min="0" step="1" style="width:64px"' },
-    { f:"ot",    type:"number", attrs:'min="0" step="1" style="width:64px"' }
+    { f:"heads", type:"number", attrs:'min="0" step="1" style="width:52px"' },
+    { f:"pay",    type:"number", attrs:'min="0" step="0.25" style="width:80px"' },
+    { f:"markup", type:"number", attrs:'min="0" step="1" style="width:68px"' },
+    { f:"bill",   type:"number", attrs:'min="0" step="0.25" style="width:80px"' },
+    { f:"st",    type:"number", attrs:'min="0" step="1" style="width:52px"' },
+    { f:"ot",    type:"number", attrs:'min="0" step="1" style="width:52px"' }
   ];
 
   /* Rows are built once and then updated in place, so typing never steals focus. */
