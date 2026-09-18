@@ -178,10 +178,10 @@
   tbody td:first-child{font-family:var(--sans)}
   thead th.in{text-align:left}   /* input columns: title sits over the field's left edge */
   tbody tr:nth-child(even) td{background:var(--sunken)}
-  td.out{background:var(--navy-tint);font-weight:500}
+  td.out{background:var(--navy-tint);font-weight:500;white-space:nowrap}
   tbody tr:nth-child(even) td.out{background:#DFE9F4}
   tfoot th,tfoot td{
-    background:var(--band);padding:10px;text-align:right;
+    background:var(--band);padding:10px 8px;text-align:right;white-space:nowrap;
     border-top:2px solid var(--navy);border-right:1px solid var(--rule-soft);
     font:500 14px/1.3 var(--mono);color:var(--ink);
   }
@@ -357,6 +357,7 @@
       <h2>Order</h2>
       <span class="hint">Priced separately from the rate card.</span>
       <span class="hd-fields">
+        <button class="btn" id="gripToggle" type="button" aria-pressed="false">GRIP</button>
         <span class="weeks">OT billing
           <select id="orderOtMode">
             <option value="x15">Bill OT at 1.5x the bill rate</option>
@@ -370,7 +371,7 @@
         <thead>
           <tr>
             <th>Role</th><th class="in">Job scope</th><th class="in">Heads</th><th class="in">Pay $/hr</th><th class="in">Markup</th><th class="in">Bill $/hr</th>
-            <th class="in">ST hrs</th><th class="in">OT hrs</th><th>Weekly bill</th><th>Weekly GP</th><th>GP %</th><th></th>
+            <th class="in">ST hrs</th><th class="in">OT hrs</th><th id="hOut1">Weekly bill</th><th id="hOut2">Weekly GP</th><th id="hOut3">GP %</th><th></th>
           </tr>
         </thead>
         <tbody id="reqBody"></tbody>
@@ -419,6 +420,7 @@
   };
 
   var mode = "markup";
+  var grip = false;   // order table showing GRIP columns
   var lines = [];
   var nextId = 1;
 
@@ -536,6 +538,16 @@
     };
   }
 
+  /* Rounded burdens, used only for PGP $ in GRIP view. */
+  var GRIP_BURDEN = { "light-industrial":24, "office":19, "light-assembly":21 };
+
+  /* PGP $ spreads the straight-time margin across every hour worked, including OT. */
+  function pgpDollars(L){
+    var cost = L.pay * (1 + GRIP_BURDEN[L.scope]/100);
+    return (L.bill - cost) * (L.st + L.ot) * L.heads;
+  }
+  function gripPair(pgp){ return money0(pgp * 0.03) + " / " + money0(pgp * 0.04); }
+
   function lineMath(L){
     var burden = BURDEN_BY_SCOPE[L.scope];
     var cost = L.pay * (1 + burden/100);
@@ -638,29 +650,67 @@
     if (L.el) L.el.querySelector('[data-f="markup"]').value = L.markup;
   }
 
+  var money$ = function(n){ return n < 0 ? "var(--flag)" : "var(--green)"; };
+
   function recalc(){
-    var totHeads = 0, totBill = 0, totGp = 0;
+    var totHeads = 0, totBill = 0, totGp = 0, totPgp = 0;
 
     lines.forEach(function(L){
-      var m = lineMath(L);
-      totHeads += L.heads; totBill += m.weeklyBill; totGp += m.weeklyGp;
+      var m = lineMath(L), pgp = pgpDollars(L);
+      totHeads += L.heads; totBill += m.weeklyBill; totGp += m.weeklyGp; totPgp += pgp;
       if (!L.el) return;
-      L.el.querySelector(".c-bill").textContent = money0(m.weeklyBill);
-      var gpc = L.el.querySelector(".c-gp");
-      gpc.textContent = money0(m.weeklyGp);
-      gpc.style.color = m.weeklyGp < 0 ? "var(--flag)" : "var(--green)";
-      var mc = L.el.querySelector(".c-margin");
-      mc.textContent = m.weeklyBill > 0 ? pct2(m.margin) : "—";
-      mc.style.color = (m.weeklyBill > 0 && m.margin < 0.10) ? "var(--flag)" : "";
+      var c1 = L.el.querySelector(".c-bill"),
+          c2 = L.el.querySelector(".c-gp"),
+          c3 = L.el.querySelector(".c-margin");
+      if (grip){
+        c1.textContent = money0(m.weeklyGp);
+        c1.style.color = money$(m.weeklyGp);
+        c2.textContent = money0(pgp);
+        c2.style.color = money$(pgp);
+        c3.textContent = gripPair(pgp);
+        c3.style.color = "";
+      } else {
+        c1.textContent = money0(m.weeklyBill);
+        c1.style.color = "";
+        c2.textContent = money0(m.weeklyGp);
+        c2.style.color = money$(m.weeklyGp);
+        c3.textContent = m.weeklyBill > 0 ? pct2(m.margin) : "—";
+        c3.style.color = (m.weeklyBill > 0 && m.margin < 0.10) ? "var(--flag)" : "";
+      }
     });
 
-    $("tHeads").textContent      = totHeads;
-    $("tWeeklyBill").textContent = money0(totBill);
-    $("tWeeklyGp").textContent   = money0(totGp);
-    $("tMargin").textContent     = totBill > 0 ? pct2(totGp/totBill) : "—";
-    $("tAnnualGp").textContent   = money0(totGp * num($("weeks"), 48));
-    $("tWeeklyGp").style.color   = totGp < 0 ? "var(--flag)" : "var(--green)";
-    $("tMargin").style.color     = (totBill > 0 && totGp/totBill < 0.10) ? "var(--flag)" : "";
+    $("tHeads").textContent    = totHeads;
+    $("tAnnualGp").textContent = money0(totGp * num($("weeks"), 48));
+
+    if (grip){
+      $("tWeeklyBill").textContent = money0(totGp);
+      $("tWeeklyBill").style.color = money$(totGp);
+      $("tWeeklyGp").textContent   = money0(totPgp);
+      $("tWeeklyGp").style.color   = money$(totPgp);
+      $("tMargin").textContent     = gripPair(totPgp);
+      $("tMargin").style.color     = "";
+    } else {
+      $("tWeeklyBill").textContent = money0(totBill);
+      $("tWeeklyBill").style.color = "";
+      $("tWeeklyGp").textContent   = money0(totGp);
+      $("tWeeklyGp").style.color   = money$(totGp);
+      $("tMargin").textContent     = totBill > 0 ? pct2(totGp/totBill) : "—";
+      $("tMargin").style.color     = (totBill > 0 && totGp/totBill < 0.10) ? "var(--flag)" : "";
+    }
+  }
+
+  /* GRIP view swaps the three output columns for weekly GP, PGP $ and the
+     3% / 4% GRIP pair. The inputs and every other figure stay put. */
+  function setGrip(on){
+    grip = on;
+    $("hOut1").textContent = on ? "Weekly GP" : "Weekly bill";
+    $("hOut2").textContent = on ? "PGP $"     : "Weekly GP";
+    $("hOut3").textContent = on ? "GRIP"      : "GP %";
+    var b = $("gripToggle");
+    b.textContent = on ? "Normal" : "GRIP";
+    b.setAttribute("aria-pressed", on ? "true" : "false");
+    b.classList.toggle("btn-primary", on);
+    recalc();
   }
 
   function render(){ renderCard(); recalc(); }
@@ -685,6 +735,7 @@
   });
 
   $("orderOtMode").addEventListener("change", recalc);
+  $("gripToggle").addEventListener("click", function(){ setGrip(!grip); });
   ["pay","burden","driver","stHrs","otHrs","otMode","weeks"].forEach(function(id){
     $(id).addEventListener("input", render);
     $(id).addEventListener("change", render);

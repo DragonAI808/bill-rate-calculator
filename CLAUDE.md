@@ -87,3 +87,12 @@ markup, margin, bill rate, scope, burden and overtime rule do not affect the tab
 it has its own "OT billing" setting.
 Editing a line's pay or markup reprices its bill rate in place. Typing a bill rate
 instead reads back as that line's markup, so the two always agree.
+
+The GRIP button in the order header swaps the three output columns for Weekly GP,
+PGP $ and GRIP, and reads "Normal" while on. PGP $ uses its own rounded burdens in
+`GRIP_BURDEN` (24 / 19 / 21%), not `BURDEN_BY_SCOPE`:
+
+    PGP $ = (bill - pay * (1 + grip burden/100)) * (ST hrs + OT hrs) * heads
+
+GRIP shows 3% and 4% of PGP $, whole dollars, separated by a slash. Nothing else on
+the page changes, including Annualized GP.
