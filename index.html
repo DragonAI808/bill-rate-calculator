@@ -213,10 +213,13 @@
   .btn-quiet{
     border-color:var(--rule);color:var(--ink-soft);padding:4px 9px;font-size:12px;font-weight:400;
   }
-  .btn-x{padding:2px 8px;font-size:17px;line-height:1}
-  .btn-dup{padding:2px 7px;font-size:15px;line-height:1}
+  /* Both row buttons share the height of the row inputs so the column lines up. */
+  .btn-x,.btn-dup{display:inline-flex;align-items:center;justify-content:center;vertical-align:middle;width:28px;height:28px;padding:0;line-height:1}
+  .btn-x{font-size:17px}
+  .btn-dup{font-size:15px}
   .btn-dup:hover{background:var(--navy);border-color:var(--navy);color:#fff}
-  .row-actions{white-space:nowrap;display:flex;gap:4px;justify-content:flex-end}
+  .row-actions{white-space:nowrap;text-align:right;vertical-align:middle}
+  .row-actions .btn-dup{margin-right:4px}
   .btn-quiet:hover{background:var(--flag);border-color:var(--flag);color:#fff}
   .toolbar{
     display:flex;gap:10px;align-items:center;flex-wrap:wrap;
