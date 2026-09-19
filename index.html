@@ -11,10 +11,13 @@
   :root{
     color-scheme:light;
 
-    --navy:#1D4E89;
-    --navy-deep:#14365C;
-    --navy-tint:#E7EEF6;
-    --navy-pale:#A9C4DF;
+    /* Brand green. --deep is the same hex; --lift is the lighter shade used for
+       hover states and the rule under the masthead. */
+    --navy:#023618;
+    --navy-deep:#023618;
+    --navy-lift:#04542A;
+    --navy-tint:#E6EFE9;
+    --navy-pale:#A8C6B3;
 
     --ink:#16212E;
     --ink-mid:#3D4E60;
@@ -54,7 +57,7 @@
   /* ---------- masthead ---------- */
   .masthead{
     background:var(--navy-deep);
-    border-bottom:3px solid var(--navy);
+    border-bottom:3px solid var(--navy-lift);
     padding:20px 22px;
     display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:6px 16px;
   }
@@ -180,7 +183,7 @@
   thead th.in{text-align:left}   /* input columns: title sits over the field's left edge */
   tbody tr:nth-child(even) td{background:var(--sunken)}
   td.out{background:var(--navy-tint);font-weight:500;white-space:nowrap}
-  tbody tr:nth-child(even) td.out{background:#DFE9F4}
+  tbody tr:nth-child(even) td.out{background:#D9E7DE}
   tfoot th,tfoot td{
     background:var(--band);padding:10px 8px;text-align:right;white-space:nowrap;
     border-top:2px solid var(--navy);border-right:1px solid var(--rule-soft);
@@ -209,7 +212,7 @@
   }
   .btn:hover{background:var(--band);border-color:var(--ink-mid)}
   .btn-primary{background:var(--navy);border-color:var(--navy);color:#fff}
-  .btn-primary:hover{background:var(--navy-deep);border-color:var(--navy-deep)}
+  .btn-primary:hover{background:var(--navy-lift);border-color:var(--navy-lift)}
   .btn-quiet{
     border-color:var(--rule);color:var(--ink-soft);padding:4px 9px;font-size:12px;font-weight:400;
   }
