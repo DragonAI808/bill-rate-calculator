@@ -268,7 +268,7 @@
     .masthead .logo{filter:brightness(0)}   /* the logo is white artwork; print it black */
     .masthead h1{color:var(--ink);font-size:20px}
     .masthead .stamp{color:var(--ink-soft)}
-    .cols,.divider,.toolbar,.alert,#gripToggle{display:none!important}
+    .cols,.divider,.toolbar,.alert,#gripToggle,#directHire{display:none!important}
     .card{border:0;box-shadow:none}
     .card-hd{background:#fff;border-bottom:1px solid var(--ink-soft);padding:8px 0}
     .scroller{overflow:visible}
@@ -281,6 +281,19 @@
     tfoot tr td:last-child{display:none}
     /* GRIP is an internal commission figure, so it stays off the printed sheet. */
     body.grip #hOut3,body.grip td.c-margin,body.grip #tMargin,body.grip #tMonthlyGrip{display:none}
+  }
+
+  /* ---------- direct hire ---------- */
+  .dh-grid{display:grid;grid-template-columns:1fr 1fr}
+  .dh-grid .frow{border-right:1px solid var(--rule-soft)}
+  .dh-grid .frow:nth-child(even){border-right:0}
+  .dh-grid .frow:nth-last-child(-n+2){border-bottom:0}
+  #dhAnnual{background:var(--sunken);color:var(--ink-mid)}
+  @media (max-width:640px){
+    .dh-grid{grid-template-columns:1fr}
+    .dh-grid .frow{border-right:0}
+    .dh-grid .frow:nth-last-child(-n+2){border-bottom:1px solid var(--rule-soft)}
+    .dh-grid .frow:last-child{border-bottom:0}
   }
 
   /* ---------- alert ---------- */
@@ -463,6 +476,55 @@
         <span class="inputgrp"><input id="weeks" type="number" min="1" max="52" step="1" value="48"></span>
       </span>
     </div>
+  </section>
+
+  <hr class="divider">
+
+  <section class="card" id="directHire">
+    <div class="card-hd card-hd-center">
+      <h2>Direct hire order</h2>
+      <span class="hint">Price from an hourly rate or from a salary, whichever you type last.</span>
+    </div>
+
+    <div class="dh-grid">
+      <div class="frow">
+        <label for="dhHourly">Hourly pay rate</label>
+        <div class="inputgrp">
+          <span class="u">$</span>
+          <input id="dhHourly" type="number" min="0" step="0.25" placeholder="0.00">
+          <span class="u suffix">/hr</span>
+        </div>
+      </div>
+
+      <div class="frow">
+        <label for="dhAnnual">Annualized salary</label>
+        <div class="inputgrp">
+          <span class="u">$</span>
+          <input id="dhAnnual" type="text" readonly tabindex="-1" placeholder="hourly &times; 2,080">
+        </div>
+      </div>
+
+      <div class="frow">
+        <label for="dhSalary">Salary</label>
+        <div class="inputgrp">
+          <span class="u">$</span>
+          <input id="dhSalary" type="number" min="0" step="500" placeholder="0">
+        </div>
+      </div>
+
+      <div class="frow">
+        <label for="dhFee">DH fee %</label>
+        <div class="inputgrp">
+          <input id="dhFee" type="number" min="0" step="1" value="20">
+          <span class="u suffix">%</span>
+        </div>
+      </div>
+    </div>
+
+    <dl class="metrics">
+      <div class="metric"><dt>Fee basis</dt><dd id="dhBasis">&mdash;</dd></div>
+      <div class="metric"><dt>DH $</dt><dd class="gp" id="dhAmount">&mdash;</dd></div>
+    </dl>
   </section>
 </div>
 
@@ -795,6 +857,34 @@
 
   function render(){ renderCard(); recalc(); }
 
+  /* ---------- direct hire ----------
+     One placement, priced from an hourly rate or from a salary. Typing in one
+     clears the other, so the last field touched is always the basis. */
+  var HOURS_PER_YEAR = 2080;
+  var dhFrom = "hourly";
+
+  function renderDirectHire(){
+    var hourly = num($("dhHourly")), annual = hourly * HOURS_PER_YEAR;
+    $("dhAnnual").value = hourly > 0 ? annual.toLocaleString("en-US") : "";
+
+    var basis = (dhFrom === "salary") ? num($("dhSalary")) : annual;
+    var fee = basis * num($("dhFee")) / 100;
+    $("dhBasis").textContent  = basis > 0 ? money0(basis) : "—";
+    $("dhAmount").textContent = basis > 0 ? money0(fee) : "—";
+  }
+
+  $("dhHourly").addEventListener("input", function(){
+    dhFrom = "hourly";
+    $("dhSalary").value = "";
+    renderDirectHire();
+  });
+  $("dhSalary").addEventListener("input", function(){
+    dhFrom = "salary";
+    $("dhHourly").value = "";
+    renderDirectHire();
+  });
+  $("dhFee").addEventListener("input", renderDirectHire);
+
   /* ---------- wiring ---------- */
   var settingBurden = false;
 
@@ -898,6 +988,7 @@
 
   /* Open with one worked line rather than an empty table. */
   applyScope();
+  renderDirectHire();
   showEmptyState();
   addLine(true);
   render();

@@ -121,3 +121,14 @@ primary buttons, selected pricing tab) and #00AA34 (`--brand-bright`) the card h
 The header bar runs a gradient between the two, bright on the left to dark on the right.
 `--navy-lift` (#04542A) is the lighter shade for hovers and the rule under the title bar.
 The token names still say navy for historical reasons.
+
+## Direct hire order
+
+A separate card below the staffing order, one placement at a time:
+
+    annualized salary = hourly pay * 2080
+    DH $ = fee % * (annualized salary, or the salary typed directly)
+
+Typing an hourly rate clears the salary field and vice versa, so the field touched
+last is the basis (`dhFrom`). Annualized salary is read-only. The fee starts at 20%.
+It is internal pricing, so it is left out of Copy order and hidden when printing.
