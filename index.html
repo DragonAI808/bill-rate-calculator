@@ -289,6 +289,12 @@
   .dh-grid .frow:nth-child(even){border-right:0}
   .dh-grid .frow:nth-last-child(-n+2){border-bottom:0}
   #dhAnnual{background:var(--sunken);color:var(--ink-mid)}
+  #directHire .metrics{grid-template-columns:1fr 1fr 1fr}
+  .metric dd.plain{font-weight:400}
+  .metric dd .rate{font-size:.62em;color:var(--ink-soft);margin-left:6px}
+  @media (max-width:640px){
+    #directHire .metrics{grid-template-columns:1fr}
+  }
   @media (max-width:640px){
     .dh-grid{grid-template-columns:1fr}
     .dh-grid .frow{border-right:0}
@@ -523,7 +529,8 @@
 
     <dl class="metrics">
       <div class="metric"><dt>Fee basis</dt><dd id="dhBasis">&mdash;</dd></div>
-      <div class="metric"><dt>DH $</dt><dd class="gp" id="dhAmount">&mdash;</dd></div>
+      <div class="metric"><dt>Direct hire fee</dt><dd class="gp" id="dhAmount">&mdash;</dd></div>
+      <div class="metric"><dt>GRIP</dt><dd class="plain" id="dhGrip">&mdash;</dd></div>
     </dl>
   </section>
 </div>
@@ -861,6 +868,7 @@
      One placement, priced from an hourly rate or from a salary. Typing in one
      clears the other, so the last field touched is always the basis. */
   var HOURS_PER_YEAR = 2080;
+  var DH_GRIP_BREAK = 5000;   // fees of $5,000 and up earn the higher GRIP rate
   var dhFrom = "hourly";
 
   function renderDirectHire(){
@@ -871,6 +879,12 @@
     var fee = basis * num($("dhFee")) / 100;
     $("dhBasis").textContent  = basis > 0 ? money0(basis) : "—";
     $("dhAmount").textContent = basis > 0 ? money0(fee) : "—";
+
+    /* GRIP on a direct hire fee: 6% up to $4,999, 10% from $5,000. */
+    var rate = fee < DH_GRIP_BREAK ? 0.06 : 0.10;
+    $("dhGrip").innerHTML = basis > 0
+      ? money0(fee * rate) + '<span class="rate">' + Math.round(rate * 100) + '%</span>'
+      : "—";
   }
 
   $("dhHourly").addEventListener("input", function(){

@@ -129,6 +129,9 @@ A separate card below the staffing order, one placement at a time:
     annualized salary = hourly pay * 2080
     DH $ = fee % * (annualized salary, or the salary typed directly)
 
+GRIP on that fee is tiered (`DH_GRIP_BREAK`): 6% on fees under $5,000, 10% from
+$5,000 up. The rate is shown in small type beside the amount.
+
 Typing an hourly rate clears the salary field and vice versa, so the field touched
 last is the basis (`dhFrom`). Annualized salary is read-only. The fee starts at 20%.
 It is internal pricing, so it is left out of Copy order and hidden when printing.
