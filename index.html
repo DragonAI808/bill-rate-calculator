@@ -286,7 +286,9 @@
 
   /* ---------- footer ---------- */
   .pagefoot{
-    background:var(--navy-deep);padding:10px 22px;
+    /* The header gradient mirrored: dark on the left, bright under the mark. */
+    background:linear-gradient(90deg,var(--navy-deep) 0%,var(--navy-lift) 45%,var(--brand-bright) 100%);
+    padding:10px 22px;
     display:flex;justify-content:flex-end;align-items:center;
   }
   .pagefoot .logo{height:26px;width:auto;opacity:.9}
