@@ -104,15 +104,16 @@ in-place update pattern.
 
 Pricing is separate from the rate card. Each line carries its own markup column
 (new lines start at `DEFAULT_MARKUP`, 45%) and its own job scope, whose burden comes
-from `BURDEN_BY_SCOPE`. Bill rate is pay * (1 + that line's markup). The rate card's
-markup, margin, bill rate, scope, burden and overtime rule do not affect the table;
+from `BURDEN_BY_STATE` for the order table's own state. Bill rate is pay * (1 + that
+line's markup). The rate card's
+markup, margin, bill rate, scope, burden, state and overtime rule do not affect the table;
 it has its own "OT billing" setting.
 Editing a line's pay or markup reprices its bill rate in place. Typing a bill rate
 instead reads back as that line's markup, so the two always agree.
 
 The GRIP button in the order header swaps the three output columns for Weekly GP,
 PGP $ and GRIP, and reads "Normal" while on. PGP $ uses its own rounded burdens in
-`GRIP_BURDEN` (24 / 19 / 21%), not `BURDEN_BY_SCOPE`:
+`GRIP_BY_STATE`, not `BURDEN_BY_STATE`:
 
     PGP $ = (bill - pay * (1 + grip burden/100)) * (ST hrs + OT hrs) * heads
 
