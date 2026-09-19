@@ -79,7 +79,9 @@
   /* Both cards run to the same bottom edge. The slack goes into the gap above the
      overtime group, which carries the rest of the panel down with it. */
   .cols{display:grid;grid-template-columns:minmax(0,0.95fr) minmax(0,1.05fr);gap:18px;align-items:stretch}
-  #results{display:flex;flex-direction:column}
+  /* The slack shows page colour, so it reads as a divider rather than blank card. */
+  #results{display:flex;flex-direction:column;background:var(--ground)}
+  #results table{background:var(--panel)}
   #results .sub-push{margin-top:auto}
   @media (max-width:860px){.cols{grid-template-columns:1fr}}
 
