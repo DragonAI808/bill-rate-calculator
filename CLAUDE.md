@@ -26,7 +26,7 @@ builds within a minute. Hard refresh (Ctrl+Shift+R) if the old page persists.
 Burden is a percentage of wages, applied flat to both straight time and overtime.
 
 ```
-cost to Kelly = pay * (1 + burden/100)   // shown as "Cost to Kelly"
+loaded cost = pay * (1 + burden/100)   // labelled "Pay + burden" on screen
 ```
 
 Bill rate comes from one of three modes:
@@ -71,7 +71,7 @@ switches the scope dropdown to "Custom burden".
 
 - Gross profit percentages show two decimals. Markup shows one.
 - Gross profit % turns red under 10%, in both the result panel and the order table.
-- The only warnings shown are: bill rate below the cost to Kelly, and target margin >= 100%.
+- The only warnings shown are: bill rate below pay plus burden, and target margin >= 100%.
   A previous "check your approved floor" warning was removed on purpose. Don't re-add it.
 
 ## Order table

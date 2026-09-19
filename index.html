@@ -364,13 +364,13 @@
         <div class="metric"><dt>Gross profit $</dt><dd class="gp" id="gpOut">$7.00/hr</dd></div>
         <div class="metric"><dt>Gross profit %</dt><dd id="marginOut">22.60%</dd></div>
         <div class="metric"><dt>Markup on pay</dt><dd id="markupOut">55.0%</dd></div>
-        <div class="metric"><dt>Cost to Kelly</dt><dd id="costOut">$24.00/hr</dd></div>
+        <div class="metric"><dt>Pay + burden</dt><dd id="costOut">$24.00/hr</dd></div>
       </dl>
 
       <div class="card-sub">Overtime, per hour</div>
       <table>
         <thead>
-          <tr><th>Basis</th><th>Pay</th><th>Cost</th><th>Bill</th><th>GP</th></tr>
+          <tr><th>Basis</th><th>OT pay</th><th>Pay + burden</th><th>Bill</th><th>GP</th></tr>
         </thead>
         <tbody>
           <tr>
@@ -558,7 +558,7 @@
 
     var msg = "";
     if (mode === "margin" && num($("driver")) >= 100) msg = "Margin must be under 100%. Bill rate is undefined at 100%.";
-    else if (r.gp < 0) msg = "This bill rate is below what the employee costs Kelly. Every hour worked loses money.";
+    else if (r.gp < 0) msg = "This bill rate is below pay plus burden. Every hour worked loses money.";
     var a = $("alert");
     a.textContent = msg;
     a.style.display = msg ? "block" : "none";
