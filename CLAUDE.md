@@ -116,7 +116,8 @@ outside the order table changes.
 
 ## Colors
 
-Kelly greens: #023618 carries the dark surfaces (title bar, bill rate panel, divider,
+Kelly greens: #023618 carries the dark surfaces (bill rate panel, divider,
 primary buttons, selected pricing tab) and #00AA34 (`--brand-bright`) the card headings.
+The header bar runs a left-to-right gradient between the two.
 `--navy-lift` (#04542A) is the lighter shade for hovers and the rule under the title bar.
 The token names still say navy for historical reasons.
