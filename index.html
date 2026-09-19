@@ -213,7 +213,7 @@
   td input[type=number]::-webkit-outer-spin-button,
   td input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
   td input[type=text]{font-family:var(--sans);min-width:100px}
-  .scroller{overflow-x:auto}
+  .scroller{overflow-x:auto;-webkit-overflow-scrolling:touch}
   #orderTable{min-width:900px}
   .empty td{padding:20px 16px;text-align:left;font-family:var(--sans);color:var(--ink-soft);font-size:14px;background:var(--panel)}
 
@@ -282,6 +282,29 @@
     tfoot tr td:last-child{display:none}
     /* GRIP is an internal commission figure, so it stays off the printed sheet. */
     body.grip #hOut3,body.grip td.c-margin,body.grip #tMargin,body.grip #tMonthlyGrip{display:none}
+  }
+
+  /* Touch devices: iOS zooms the page when a focused field is under 16px. */
+  @media (max-width:1024px){
+    input[type=number],input[type=text],select,td input,td select{font-size:16px}
+  }
+
+  /* ---------- phones ----------
+     iOS zooms the page when a focused field is under 16px, so the fields grow
+     rather than the text shrinking. The order table keeps its own scroll. */
+  @media (max-width:560px){
+    body{padding-inline:12px}
+    .masthead{padding:12px 16px}
+    .masthead .logo{height:44px}
+    .masthead h1{font-size:24px}
+    .metrics{grid-template-columns:1fr}
+    .metric dd{font-size:21px}
+    .card-hd{padding:10px 12px}
+    .frow{padding:10px 12px}
+    .btn{padding:10px 14px}
+    .btn-x,.btn-dup{width:34px;height:34px}
+    .toolbar{padding:12px}
+    .segs button{padding:12px 6px}
   }
 
   /* ---------- footer ---------- */

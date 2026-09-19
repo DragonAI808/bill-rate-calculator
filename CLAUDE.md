@@ -156,3 +156,12 @@ $5,000 up. The rate is shown in small type beside the amount.
 Typing an hourly rate clears the salary field and vice versa, so the field touched
 last is the basis (`dhFrom`). Annualized salary is read-only. The fee starts at 20%.
 It is internal pricing, so it is left out of Copy order and hidden when printing.
+
+## Phones and tablets
+
+- Fields are 16px at 1024px and under. Anything smaller makes iOS Safari zoom the page
+  when a field is focused, and it never zooms back.
+- Under 560px: the two cards stack, the result and direct hire figures go to one column,
+  the logo drops to 44px and buttons grow for touch.
+- The staffing order table keeps its own horizontal scroll on small screens. Twelve
+  columns will not fit a phone, and hiding columns would hide pricing.
