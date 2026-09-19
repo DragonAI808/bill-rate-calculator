@@ -76,7 +76,10 @@
   }
 
   /* ---------- cards ---------- */
-  .cols{display:grid;grid-template-columns:minmax(0,0.95fr) minmax(0,1.05fr);gap:18px;align-items:start}
+  /* Both cards run to the same bottom edge; the result panel grows its last group. */
+  .cols{display:grid;grid-template-columns:minmax(0,0.95fr) minmax(0,1.05fr);gap:18px;align-items:stretch}
+  #results{display:flex;flex-direction:column}
+  #results .metrics:last-of-type{flex:1}
   @media (max-width:860px){.cols{grid-template-columns:1fr}}
 
   .card{background:var(--panel);border:1px solid var(--rule);box-shadow:0 1px 0 rgba(22,33,46,.05)}
