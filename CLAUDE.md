@@ -1,6 +1,6 @@
-# Bill Rate Calculator
+# Rate & Fee Calculator
 
-A single-page web tool that prices staffing requisitions. Used by Robert (staffing
+A single-page web tool that prices staffing requisitions and direct hire placements. Used by Robert (staffing
 sales, Kelly Professional & Industrial) and a teammate.
 
 ## Project shape
