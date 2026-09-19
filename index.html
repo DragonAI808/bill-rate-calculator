@@ -332,7 +332,21 @@
 
   <div class="cols">
     <section class="card">
-      <div class="card-hd"><h2>Rate card</h2><span class="hint">One requisition</span></div>
+      <div class="card-hd card-hd-center">
+        <h2>Rate card</h2>
+        <span class="hint">One requisition</span>
+        <span class="hd-fields">
+          <span class="weeks">State
+            <select id="rcState">
+            <option value="CA">CA</option>
+            <option value="AZ">AZ</option>
+            <option value="OR">OR</option>
+            <option value="TX">TX</option>
+            <option value="NV">NV</option>
+            </select>
+          </span>
+        </span>
+      </div>
 
       <div class="frow">
         <label for="scope">Job scope</label>
@@ -447,6 +461,15 @@
       <h2>Staffing order</h2>
       <span class="hint">Priced separately from the rate card.</span>
       <span class="hd-fields">
+        <span class="weeks">State
+          <select id="orderState">
+            <option value="CA">CA</option>
+            <option value="AZ">AZ</option>
+            <option value="OR">OR</option>
+            <option value="TX">TX</option>
+            <option value="NV">NV</option>
+          </select>
+        </span>
         <button class="btn" id="gripToggle" type="button" aria-pressed="false">GRIP</button>
         <span class="weeks">OT billing
           <select id="orderOtMode">
@@ -568,17 +591,34 @@
 
   var mode = "markup";
   var grip = false;   // order table showing GRIP columns
+  var rcState = "CA";     // rate card's state; the order table keeps its own
+  var lastScope = "light-industrial";   // the scope to return to after a custom burden
   var lines = [];
   var nextId = 1;
 
   /* ---------- core math ---------- */
-  /* Approved burden rates by job scope, as a percentage of wages.
-     Source decimals: .24716 / .19716 / .21061 */
-  var BURDEN_BY_SCOPE = {
-    "light-industrial": 24.716,
-    "office":           19.716,
-    "light-assembly":   21.061
+  /* Approved burden rates by state and job scope, as a percentage of wages.
+     Source: burden.xlsx. Do not round. */
+  var BURDEN_BY_STATE = {
+    CA: { "light-industrial":24.716, "office":19.716, "light-assembly":21.061 },
+    AZ: { "light-industrial":18.16,  "office":13.16,  "light-assembly":14.49  },
+    OR: { "light-industrial":22.04,  "office":17.04,  "light-assembly":18.37  },
+    TX: { "light-industrial":21.15,  "office":16.15,  "light-assembly":17.49  },
+    NV: { "light-industrial":20.43,  "office":15.43,  "light-assembly":16.76  }
   };
+
+  /* Rounded burdens used only for PGP $ in GRIP view. Source: grip.xlsx. */
+  var GRIP_BY_STATE = {
+    CA: { "light-industrial":24, "office":19, "light-assembly":21 },
+    AZ: { "light-industrial":20, "office":15, "light-assembly":16 },
+    OR: { "light-industrial":24, "office":19, "light-assembly":16 },
+    TX: { "light-industrial":20, "office":15, "light-assembly":16 },
+    NV: { "light-industrial":20, "office":15, "light-assembly":16 }
+  };
+
+  function rcBurden(scope){ return BURDEN_BY_STATE[rcState][scope]; }
+  function orderBurden(scope){ return BURDEN_BY_STATE[$("orderState").value][scope]; }
+  function orderGrip(scope){ return GRIP_BY_STATE[$("orderState").value][scope]; }
 
   function price(pay, burdenPct, mode, driver){
     var b = burdenPct / 100;
@@ -675,7 +715,7 @@
     return {
       id: nextId++,
       role: "",
-      scope: pref && BURDEN_BY_SCOPE[$("scope").value] ? $("scope").value : "light-industrial",
+      scope: pref && BURDEN_BY_STATE[rcState][$("scope").value] ? $("scope").value : "light-industrial",
       heads: 1,
       pay: pref ? s.pay : 20,
       markup: DEFAULT_MARKUP,
@@ -685,18 +725,15 @@
     };
   }
 
-  /* Rounded burdens, used only for PGP $ in GRIP view. */
-  var GRIP_BURDEN = { "light-industrial":24, "office":19, "light-assembly":21 };
-
   /* PGP $ spreads the straight-time margin across every hour worked, including OT. */
   function pgpDollars(L){
-    var cost = L.pay * (1 + GRIP_BURDEN[L.scope]/100);
+    var cost = L.pay * (1 + orderGrip(L.scope)/100);
     return (L.bill - cost) * (L.st + L.ot) * L.heads;
   }
   function gripPair(pgp){ return money0(pgp * 0.03) + " / " + money0(pgp * 0.04); }
 
   function lineMath(L){
-    var burden = BURDEN_BY_SCOPE[L.scope];
+    var burden = orderBurden(L.scope);
     var cost = L.pay * (1 + burden/100);
     var stGp = L.bill - cost;
     var ot = otFigures(L.pay, burden, L.bill, $("orderOtMode").value);
@@ -917,20 +954,52 @@
   /* ---------- wiring ---------- */
   var settingBurden = false;
 
+  /* A typed burden belongs to no state, so the menu shows a dash until a state
+     or job scope is picked again. The dash is not one of the choices. */
+  function showStateDash(on){
+    var sel = $("rcState"), dash = sel.querySelector('option[value=""]');
+    if (on){
+      if (!dash){
+        dash = document.createElement("option");
+        dash.value = ""; dash.textContent = "—";
+        dash.hidden = true; dash.disabled = true;   // shown when selected, never a choice
+        sel.insertBefore(dash, sel.firstChild);
+      }
+      sel.value = "";
+    } else {
+      if (dash) dash.remove();
+      sel.value = rcState;
+    }
+  }
+
   function applyScope(){
     var v = $("scope").value;
-    if (v === "custom") { render(); return; }
+    if (v === "custom") { showStateDash(true); render(); return; }
+    lastScope = v;
+    showStateDash(false);
     settingBurden = true;
-    $("burden").value = BURDEN_BY_SCOPE[v];
+    $("burden").value = rcBurden(v);
     settingBurden = false;
     render();
   }
 
   $("scope").addEventListener("change", applyScope);
 
-  /* A hand-typed burden means the scope rate no longer applies. */
+  $("rcState").addEventListener("change", function(){
+    var v = $("rcState").value;
+    if (!v) return;                                   // the dash itself
+    rcState = v;
+    if ($("scope").value === "custom") $("scope").value = lastScope;
+    applyScope();
+  });
+
+  $("orderState").addEventListener("change", recalc);
+
+  /* A hand-typed burden means neither the scope rate nor the state rate applies. */
   $("burden").addEventListener("input", function(){
-    if (!settingBurden && $("scope").value !== "custom") $("scope").value = "custom";
+    if (settingBurden) return;
+    if ($("scope").value !== "custom") $("scope").value = "custom";
+    showStateDash(true);
   });
 
   $("orderOtMode").addEventListener("change", recalc);
@@ -976,7 +1045,7 @@
     rows.push(grip
       ? "Monthly PGP $\t" + money0(monthlyPgp) + "\tMonthly GRIP\t" + gripPair(monthlyPgp)
       : "Annualized GP\t" + money0(totGp * weeks));
-    rows.push("Weeks billed\t" + weeks + "\tOT billing\t" +
+    rows.push("State\t" + $("orderState").value + "\tWeeks billed\t" + weeks + "\tOT billing\t" +
       ($("orderOtMode").value === "x15" ? "OT at 1.5x the bill rate" : "OT premium passed through at cost"));
     return rows.join("\n");
   }

@@ -1,0 +1,4 @@
+# Source spreadsheets for the rate tables. Kept local: the Pages site serves
+# whatever is committed, and these are internal rate data.
+*.xlsx
+Web PNG.png

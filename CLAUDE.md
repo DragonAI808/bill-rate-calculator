@@ -59,16 +59,35 @@ OT bill = bill + 0.5 * pay * (1+burden/100) // "pass premium at cost" mode
 
 Markup is measured against pay, margin against bill. They are never the same number.
 
-## Burden rates by job scope (approved, do not round)
+## Burden rates by state and job scope (approved, do not round)
 
-| Scope            | Burden   |
-|------------------|----------|
-| Light industrial | 24.716%  |
-| Office           | 19.716%  |
-| Light assembly   | 21.061%  |
+| State | Light industrial | Office | Light (electronic) assembly |
+|-------|------------------|--------|-----------------------------|
+| CA    | 24.716% | 19.716% | 21.061% |
+| AZ    | 18.16%  | 13.16%  | 14.49%  |
+| OR    | 22.04%  | 17.04%  | 18.37%  |
+| TX    | 21.15%  | 16.15%  | 17.49%  |
+| NV    | 20.43%  | 15.43%  | 16.76%  |
 
-They live in `BURDEN_BY_SCOPE` in the script. Typing in the burden field by hand
-switches the scope dropdown to "Custom burden".
+GRIP burdens for PGP $ (rounded, ):
+
+| State | Light industrial | Office | Light (electronic) assembly |
+|-------|------------------|--------|-----------------------------|
+| CA    | 24% | 19% | 21% |
+| AZ    | 20% | 15% | 16% |
+| OR    | 24% | 19% | 16% |
+| TX    | 20% | 15% | 16% |
+| NV    | 20% | 15% | 16% |
+
+Both live in the script (, ), sourced from burden.xlsx
+and grip.xlsx. Those spreadsheets stay out of git (.gitignore) because Pages serves
+whatever is committed.
+
+The rate card and the staffing order each have their own State menu in their header,
+independent of each other, both starting at CA. Direct hire is unaffected by state.
+Typing a burden by hand switches the scope to "Custom burden" and the rate card's state
+menu to "—" (a hidden option, never a choice). Picking a state or a scope again clears the
+dash and refills burden from the table.
 
 ## Display rules
 
