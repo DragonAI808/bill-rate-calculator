@@ -269,7 +269,7 @@
     .masthead .logo{filter:brightness(0)}   /* the logo is white artwork; print it black */
     .masthead h1{color:var(--ink);font-size:20px}
     .masthead .stamp{color:var(--ink-soft)}
-    .cols,.divider,.toolbar,.alert,#gripToggle,#directHire{display:none!important}
+    .cols,.divider,.toolbar,.alert,#gripToggle,#directHire,.pagefoot{display:none!important}
     .card{border:0;box-shadow:none}
     .card-hd{background:#fff;border-bottom:1px solid var(--ink-soft);padding:8px 0}
     .scroller{overflow:visible}
@@ -283,6 +283,13 @@
     /* GRIP is an internal commission figure, so it stays off the printed sheet. */
     body.grip #hOut3,body.grip td.c-margin,body.grip #tMargin,body.grip #tMonthlyGrip{display:none}
   }
+
+  /* ---------- footer ---------- */
+  .pagefoot{
+    background:var(--navy-deep);padding:10px 22px;
+    display:flex;justify-content:flex-end;align-items:center;
+  }
+  .pagefoot .logo{height:26px;width:auto;opacity:.9}
 
   /* ---------- direct hire ---------- */
   .dh-grid{display:grid;grid-template-columns:1fr 1fr}
@@ -535,6 +542,10 @@
       <div class="metric"><dt>GRIP</dt><dd class="plain" id="dhGrip">&mdash;</dd></div>
     </dl>
   </section>
+
+  <footer class="pagefoot">
+    <img class="logo" src="kelly-logo.png" alt="Kelly">
+  </footer>
 </div>
 
 <script>

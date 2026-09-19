@@ -7,7 +7,8 @@ sales, Kelly Professional & Industrial) and a teammate.
 
 - One file: `index.html`. Everything is inline — CSS, JavaScript, no build step,
   no framework, no npm, no bundler. Keep it that way.
-- The only other file is `kelly-logo.png`, the white Kelly wordmark in the header.
+- The only other file is `kelly-logo.png`, the white Kelly wordmark in the header and,
+  smaller, in the footer bar.
   It is white artwork on transparency, so print rules render it black.
 - The only external request is the Google Fonts stylesheet for IBM Plex Sans and
   IBM Plex Mono. Don't add other external scripts or stylesheets.
