@@ -111,3 +111,10 @@ outside the order table changes.
 - The ⧉ button on a row duplicates it directly below; rows stay independent afterwards.
 - In GRIP view the last row shows Monthly PGP $ and, beside it, Monthly GRIP: 3% / 4% of
   that monthly figure.
+
+## Colors
+
+Kelly greens: #023618 carries the dark surfaces (title bar, bill rate panel, divider,
+primary buttons, selected pricing tab) and #00AA34 (`--brand-bright`) the card headings.
+`--navy-lift` (#04542A) is the lighter shade for hovers and the rule under the title bar.
+The token names still say navy for historical reasons.
