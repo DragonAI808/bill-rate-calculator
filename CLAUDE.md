@@ -69,7 +69,7 @@ Markup is measured against pay, margin against bill. They are never the same num
 | TX    | 21.15%  | 16.15%  | 17.49%  |
 | NV    | 20.43%  | 15.43%  | 16.76%  |
 
-GRIP burdens for PGP $ (rounded, ):
+GRIP burdens for PGP $ (rounded, `GRIP_BY_STATE`):
 
 | State | Light industrial | Office | Light (electronic) assembly |
 |-------|------------------|--------|-----------------------------|
@@ -79,7 +79,7 @@ GRIP burdens for PGP $ (rounded, ):
 | TX    | 20% | 15% | 16% |
 | NV    | 20% | 15% | 16% |
 
-Both live in the script (, ), sourced from burden.xlsx
+Both live in the script (`BURDEN_BY_STATE`, `GRIP_BY_STATE`), sourced from burden.xlsx
 and grip.xlsx. Those spreadsheets stay out of git (.gitignore) because Pages serves
 whatever is committed.
 
